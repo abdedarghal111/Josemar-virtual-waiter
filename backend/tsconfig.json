@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "module": "ES2022",
+        "target": "ES2022",
+        "moduleResolution": "node",
+        "outDir": "./../dist",
+        "rootDir": "./src",
+        "baseUrl": ".",
+        "strict": false,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "noUncheckedIndexedAccess": true,
+        "allowSyntheticDefaultImports": true,
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": false // para eliminar imports vacíos
+    },
+    
+    "include": ["src"],
+    "exclude": ["node_modules"]
+}

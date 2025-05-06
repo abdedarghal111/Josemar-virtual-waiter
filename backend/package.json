@@ -1,0 +1,25 @@
+{
+  "author": {
+    "name": "Abderrahim Darghal Belkacemi",
+    "email": "abdedarghal111@gmail.com",
+    "url": "https://github.com/abdedarghal111"
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs --dev && shx cp -r node_modules ../dist/node_modules",
+    "dev": "npm run build && node ../dist/app.mjs"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "esbuild": "^0.25.3",
+    "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-replace": "^1.4.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/primus": "^7.3.9",
+    "express": "^5.1.0",
+    "primus": "^8.0.9",
+    "shx": "^0.4.0"
+  }
+}

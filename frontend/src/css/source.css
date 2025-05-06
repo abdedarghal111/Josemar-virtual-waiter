@@ -1,0 +1,12 @@
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss';
+
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton/optional/presets';
+@import './jvwTheme';
+
+@source '../../node_modules/@skeletonlabs/skeleton-svelte/dist';
+@source '../../src';
+
+@custom-variant dark (&:where([data-mode=dark], [data-mode=dark] *));

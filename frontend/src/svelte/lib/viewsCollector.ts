@@ -8,9 +8,10 @@ import Register from '../views/register.svelte'
 import Profile from '../views/profile.svelte'
 import InfoScreen from '../views/infoScreen.svelte'
 import Login from '../views/login.svelte'
+import { storable } from './storable';
 
 
-export let currentView = writable('home')
+export let currentView = storable('currentView', 'home')
 let previusView = get(currentView)
 
 export function setCurrentView(view: string) {
@@ -19,7 +20,7 @@ export function setCurrentView(view: string) {
 }
 
 export function setPreviusView(){
-    if(get(currentView) === previusView){
+    if(get(currentView) === previusView && previusView !== 'login' && previusView !== 'register'){
         setCurrentView(previusView)
     }else{
         setCurrentView('home')

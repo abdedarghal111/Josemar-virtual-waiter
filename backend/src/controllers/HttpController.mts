@@ -6,9 +6,19 @@ import { Sequelize } from 'sequelize'
 import SessionSequelize from 'connect-session-sequelize'
 import { __public, __static, ENV_FILE_PATH, SERVER_CRT_FILE_PATH, SERVER_KEY_FILE_PATH, SESSION_DB_FILE_PATH } from './../paths.mjs';
 import dotenv from 'dotenv'
+import helmet from 'helmet';
 
 // cargando variables de entorno
 dotenv.config({ path: ENV_FILE_PATH })
+
+//userData
+declare module 'express-session' {
+  interface SessionData {
+    userData?: {
+      [key: string]: any;
+    }
+  }
+}
 
 // Iniciar guardado de las sesiones
 const sequelize = new Sequelize({
@@ -36,7 +46,7 @@ const httpsServer = https.createServer({
 
 // Express config
 app.use(express.static(__public));
-console.log(process.env.SESION_SIGN_COOKIE_KEY)
+app.use(express.json())
 app.use(session({
   secret: process.env.SESION_SIGN_COOKIE_KEY,
   resave: false,
@@ -47,6 +57,17 @@ app.use(session({
     // maxAge: 1000 * 60 * 30 // 30 minutos
   }
 }))
+app.use(helmet(
+  {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+  }
+))
+
 app.get('/', (req, res) => {
   res.sendFile(`${__static}/index.html`);
 });

@@ -1,16 +1,28 @@
 import { STORAGE_DB_FILE_PATH } from "../paths.mts";
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize, DataTypes, Model, Optional } from "sequelize";
 
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: STORAGE_DB_FILE_PATH, // Ruta del archivo SQLite
-    //   logging: (msg) => {
-    //     // Solo loguea si el mensaje contiene "ERROR"
-    //     if (msg.includes('ERROR')) console.error(msg);
-    //   }
+      logging: (msg) => {
+        // Solo loguea si el mensaje contiene "ERROR"
+        if (msg.includes('ERROR')) console.error(msg);
+      }
 })
 
-export const User = sequelize.define('User', {
+interface UserAttributes extends Model {
+  id: number
+  name: string
+  surname: string
+  username: string
+  email: string
+  password: string
+  permissionLevel: 'admin' | 'worker' | 'user'
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export const User = sequelize.define<UserAttributes, any>('User', {
     id: {
         type: DataTypes.INTEGER.UNSIGNED,
         autoIncrement: true,
@@ -20,6 +32,9 @@ export const User = sequelize.define('User', {
         type: DataTypes.STRING
     },
     surname: {
+        type: DataTypes.STRING
+    },
+    username: {
         type: DataTypes.STRING
     },
     email: {
@@ -380,6 +395,18 @@ Ingredient.belongsToMany(Dish, { through: DishIngredient, foreignKey: 'ingredien
 
 //syncing
 await sequelize.sync()
+User.sync()
+Product.sync()
+Category.sync()
+Order.sync()
+OrderProduct.sync()
+ProductImage.sync()
+Menu.sync()
+MenuProduct.sync()
+Drink.sync()
+Dish.sync()
+DishIngredient.sync()
+Ingredient.sync()
 
 export class DatabaseController {
     static sequelize = sequelize

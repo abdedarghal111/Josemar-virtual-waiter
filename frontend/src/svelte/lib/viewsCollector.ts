@@ -11,6 +11,10 @@ import Login from '../views/login.svelte'
 import { storable } from './storable';
 import StartScreen from '../views/startScreen.svelte';
 import WorkerPannel from '../views/workers/pannel.svelte';
+import AdminEditDatabase from '../views/admin/editDatabase.svelte';
+import WorkerWaiterMode from '../views/workers/waiterMode.svelte';
+import WorkerCheckReserves from '../views/workers/checkReserves.svelte';
+import WorkerCheffMode from '../views/workers/cheffMode.svelte';
 
 
 export let currentView = storable('currentView', 'home')
@@ -39,5 +43,9 @@ export const views = {
     infoScreen: InfoScreen,
     login: Login,
     startScreen: StartScreen,
-    "workers.pannel": WorkerPannel
+    "worker.pannel": WorkerPannel,
+    "admin.editDatabase": AdminEditDatabase,
+    "worker.waiterMode": WorkerWaiterMode,
+    "worker.checkReserves": WorkerCheckReserves,
+    "worker.cheffMode": WorkerCheffMode
 }

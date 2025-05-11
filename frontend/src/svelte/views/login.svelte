@@ -18,8 +18,11 @@
     setPreviusView()
   }
 
-  async function onSubmit(this: HTMLButtonElement) {
-    this.disabled = true
+  async function onSubmit(ev: Event) {
+
+    ev.preventDefault()
+    let submit = document.getElementById("login/submit") as HTMLInputElement
+    submit.disabled = true
 
     let sendData = {
       userOrEmail: (document.getElementById("login/userOrEmail") as HTMLInputElement)?.value,
@@ -39,20 +42,18 @@
         loading: "Cargando...",
         success: (response) => {
             let received = response.data
-            console.log(received)
             if(received.success){
                 setUser(received.user)
                 setPreviusView()
                 return received.message
             }else{
                 err = received.message
-                console.log(received)
                 throw new Error(received.msg)
             }
         },
         error: () => err
     }).finally(async () => {
-        this.disabled = false
+        submit.disabled = false
     })
   }
 </script>
@@ -67,7 +68,7 @@
     <div class={"flex flex-col items-center p-5 " + pClass}>
       <div class="h-full flex flex-col items-center gap-5">
 
-        <form class="w-[70vw] sm:w-md space-y-4">
+        <form on:submit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
             <label class="label">
                 <span class="label-text text-lg">Nombre de usuario o email</span>
                 <input id="login/userOrEmail" type="text" class="input input-bordered w-full" placeholder="Introduce tu usuario o email" />
@@ -78,9 +79,11 @@
                 <span class="label-text text-lg">Contraseña</span>
                 <input id="login/password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
             </label>
-        </form>
 
-        <button class={bClass} onclick={onSubmit}>Enviar</button>
+            <div class="flex flex-col items-center">
+              <input id="login/submit" class={"w-fit " + bClass} type="submit" value="Entrar"/>
+            </div>
+        </form>
       </div>
     </div>
   </div>

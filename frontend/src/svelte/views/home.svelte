@@ -75,10 +75,9 @@
                     </button>
 
                     {#if $userdata.permissionLevel !== 'user'}
-                        <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('pannel')}>
+                        <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.pannel')}>
                             <Fa icon={faBriefcase} size="lg" /> Panel de empleados
                         </button>
-                        
                     {/if}
                 {/if}
             </div>

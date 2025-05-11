@@ -39,7 +39,8 @@
         loading: "Cargando...",
         success: (response) => {
             let received = response.data
-            if(received.status){
+            console.log(received)
+            if(received.success){
                 setUser(received.user)
                 setPreviusView()
                 return received.message

@@ -1,7 +1,7 @@
 import { writable, get } from 'svelte/store';
 
 import Home from '../views/home.svelte'
-import Pannel from '../views/pannel.svelte'
+import Pannel from '../views/workers/pannel.svelte'
 import Menu from '../views/menu.svelte'
 import Reserve from '../views/reserve.svelte'
 import Register from '../views/register.svelte'
@@ -10,6 +10,7 @@ import InfoScreen from '../views/infoScreen.svelte'
 import Login from '../views/login.svelte'
 import { storable } from './storable';
 import StartScreen from '../views/startScreen.svelte';
+import WorkerPannel from '../views/workers/pannel.svelte';
 
 
 export let currentView = storable('currentView', 'home')
@@ -37,5 +38,6 @@ export const views = {
     profile: Profile,
     infoScreen: InfoScreen,
     login: Login,
-    startScreen: StartScreen
+    startScreen: StartScreen,
+    "workers.pannel": WorkerPannel
 }

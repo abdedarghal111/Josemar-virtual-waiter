@@ -79,7 +79,7 @@ export class HttpController {
 
     static startServer() {
         // Iniciar el servidor
-        const PORT = 403;
+        const PORT = 443;
         httpsServer.listen(PORT, () => {
         console.log(`Servidor corriendo en https://localhost:${PORT}`);
         });

@@ -1,13 +1,12 @@
 <script lang='ts'>
     import Fa from 'svelte-fa'
-    import { faBurger, faDoorOpen } from '@fortawesome/free-solid-svg-icons'
-    import { faCalendarDays, faAddressCard, faUserPlus } from '@fortawesome/free-solid-svg-icons'
+    import { faCalendarDays, faAddressCard, faUserPlus, faBurger, faDoorOpen, faBriefcase } from '@fortawesome/free-solid-svg-icons'
     import ClientFooter from '../partials/ClientFooter.svelte'
     // import { UserRoundPlus } from '@lucide/svelte'
 
     import { setCurrentView } from '../lib/viewsCollector'
     import View from '../components/View.svelte'
-    import { isLogged } from '../lib/userdata.svelte';
+    import { setUser, userdata } from '../lib/userdata.svelte';
     import TittleHeader from '../partials/TittleHeader.svelte';
     import toast from 'svelte-french-toast';
     import axios from 'axios';
@@ -38,7 +37,7 @@
             </div>
 
             <div class={"flex flex-col items-center p-5 mb-10 " + pClass}>
-                {#if !isLogged()}
+                {#if !$userdata.logged}
                     <button class={"flex items-center gap-2 mb-5 " + bClass} onclick={() => setCurrentView('register')}>
                         <Fa icon={faUserPlus} size="lg" /> Registrarse
                     </button>
@@ -52,24 +51,35 @@
                     <Fa icon={faBurger} size="lg" /> Ver la carta
                 </button>
 
-                {#if isLogged()}
+                {#if $userdata.logged}
                     <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('reserve')}>
                         <Fa icon={faCalendarDays} size="lg" /> Realizar o ver reserva
                     </button>
 
-                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => {
+                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={
+                    () => {
                         axios({
                             method: "post",
                             url: `${window.location.origin}/api/logout`,
                             headers: {
                                 "Content-Type": "application/json",
                             }
-                        }).then(() => {toast.success("Sesion cerrada")}).catch(() => {
+                        }).then(() => {
+                            setUser({}, false)
+                            toast.success("Sesion cerrada")
+                        }).catch(() => {
                             toast.error("Error en la red")
                         })}
                     }>
                         <Fa icon={faDoorOpen} size="lg" /> Cerrar sesión
                     </button>
+
+                    {#if $userdata.permissionLevel !== 'user'}
+                        <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('pannel')}>
+                            <Fa icon={faBriefcase} size="lg" /> Panel de empleados
+                        </button>
+                        
+                    {/if}
                 {/if}
             </div>
         </div>

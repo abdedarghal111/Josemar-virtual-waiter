@@ -3,7 +3,7 @@ import toast from "svelte-french-toast"
 import { storable } from "./storable"
 import { get } from "svelte/store"
 
-let userdata = $state({
+export let userdata = storable('userdata', {
     id: 0,
     name: '',
     surname: '',
@@ -14,12 +14,12 @@ let userdata = $state({
 })
 
 export function isLogged() {
-    return userdata.logged
+    return get(userdata).logged
 }
 
-export function getUser() {
-    return userdata
-}
+// export function getUser() {
+//     return userdata
+// }
 
 export function setUser(user: any, logged: boolean = true) {
     let emptyUser: any = {
@@ -36,7 +36,7 @@ export function setUser(user: any, logged: boolean = true) {
         emptyUser[key] = user[key]
     }
 
-    userdata = emptyUser
+    userdata.set(emptyUser)
 }
 
 export async function checkSesion() {

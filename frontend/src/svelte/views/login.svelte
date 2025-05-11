@@ -5,38 +5,54 @@
 
   import { setCurrentView, setPreviusView } from "../lib/viewsCollector";
   import View from "../components/View.svelte";
-  import { isLogged } from "../lib/userdata.svelte";
+  import { checkSesion, isLogged, setUser } from "../lib/userdata.svelte";
   import TittleHeader from "../partials/TittleHeader.svelte";
-    import { postWithToast } from "../lib/apiComunication";
+    import toast from "svelte-french-toast";
+    import Axios from "axios";
 
   const pClass = "bg-surface-100 dark:bg-surface-800 rounded-md w-fit";
   const bClass = "bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md";
   // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
 
+  if(isLogged()){
+    setPreviusView()
+  }
+
   async function onSubmit(this: HTMLButtonElement) {
-    // isLogged.set(true);
+    this.disabled = true
 
-    // this.disabled = true
-    
-    let response = await postWithToast(
-      "WhoAmI", {
-      username: (document.getElementById("login/username") as HTMLInputElement)?.value,
-      password: (document.getElementById("login/password") as HTMLInputElement)?.value,
-    },{
+    let sendData = {
+      userOrEmail: (document.getElementById("login/userOrEmail") as HTMLInputElement)?.value,
+      password: (document.getElementById("login/password") as HTMLInputElement)?.value
+    }
+
+    let err = "Error en la red"
+    toast.promise(
+        Axios({
+        method: "post",
+        url: `${window.location.origin}/api/login`,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: sendData,
+    }),{
         loading: "Cargando...",
-        success: "Éxito al iniciar sesión",
-        error: "Error al iniciar sesión"
-    }, (response) => {
-      setPreviusView()
-      return {
-        status: true,
-        msg: "Éxito al iniciar sesión",
-      }
+        success: (response) => {
+            let received = response.data
+            if(received.status){
+                setUser(received.user)
+                setPreviusView()
+                return received.message
+            }else{
+                err = received.message
+                console.log(received)
+                throw new Error(received.msg)
+            }
+        },
+        error: () => err
+    }).finally(async () => {
+        this.disabled = false
     })
-
-    console.log(response)
-
-    // setPreviusView()
   }
 </script>
 
@@ -51,15 +67,16 @@
       <div class="h-full flex flex-col items-center gap-5">
 
         <form class="w-[70vw] sm:w-md space-y-4">
-          <label class="label">
-            <span class="label-text text-lg">Usuario</span>
-            <input id="login/username" type="user" class="input" placeholder="Introduce tu usuario" />
-          </label>
-          
-          <label class="label">
-            <span class="label-text text-lg">Contraseña</span>
-            <input  id="login/password" type="password" class="input" placeholder="Introduce tu contraseña" />
-          </label>
+            <label class="label">
+                <span class="label-text text-lg">Nombre de usuario o email</span>
+                <input id="login/userOrEmail" type="text" class="input input-bordered w-full" placeholder="Introduce tu usuario o email" />
+            </label>
+
+
+            <label class="label">
+                <span class="label-text text-lg">Contraseña</span>
+                <input id="login/password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
+            </label>
         </form>
 
         <button class={bClass} onclick={onSubmit}>Enviar</button>

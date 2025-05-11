@@ -9,6 +9,7 @@ import Profile from '../views/profile.svelte'
 import InfoScreen from '../views/infoScreen.svelte'
 import Login from '../views/login.svelte'
 import { storable } from './storable';
+import StartScreen from '../views/startScreen.svelte';
 
 
 export let currentView = storable('currentView', 'home')
@@ -35,5 +36,6 @@ export const views = {
     register: Register,
     profile: Profile,
     infoScreen: InfoScreen,
-    login: Login
+    login: Login,
+    startScreen: StartScreen
 }

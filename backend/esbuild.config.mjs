@@ -39,7 +39,7 @@ if (existsSync(__dist) && !checkParam('--no-clean')) {
 
 if (checkParam('--dev')) {
   // configuración para produccion
-  await esbuild.build({
+  await esbuild.context({
     logLevel: 'info',
     entryPoints: [`${__src}/**/*.mts`],
     sourceRoot: __src,
@@ -68,7 +68,7 @@ if (checkParam('--dev')) {
         ],
       })
     ]
-  }).catch(() => process.exit(1))
+  }).catch(() => process.exit(1)).then(ctx => ctx.watch())
   // copyFileSync(`${__src}/../node_modules`, `${__dist}/node_modules`)
 } else if (checkParam('--production')) {
   // configuración para desarrollo

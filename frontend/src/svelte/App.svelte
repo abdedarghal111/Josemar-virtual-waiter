@@ -4,7 +4,7 @@
   import { views, currentView } from './lib/viewsCollector';
   import { Toaster } from 'svelte-french-toast';
   import { onMount } from 'svelte';
-    import { get } from 'svelte/store';
+  import { get } from 'svelte/store';
 
   let loadingScreen = $state(true)
 

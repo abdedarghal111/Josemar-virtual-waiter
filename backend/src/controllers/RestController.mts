@@ -2,40 +2,40 @@ import { Op } from "sequelize"
 import { User } from "./DatabaseController.mts"
 import { HttpController } from "./HttpController.mts"
 import bcrypt from "bcrypt"
+import { LoginRequest, type ValidFields as LoginValidField } from "_shared/requests/LoginRequest.mjs"
+import { RegisterRequest, type ValidFields as RegisterValidField } from "_shared/requests/RegisterRequest.mjs"
+import { PrivateUser } from "_shared/SharedTypes.mjs"
+import { WhoAmIRequest } from "_shared/requests/WhoAmIRequest.mjs"
+import { LogoutRequest } from "_shared/requests/LogoutRequest.mjs"
 
 const app = HttpController.express
 const API = '/api/'
 
-app.post(API + 'whoAmI', async (req, res) => {
+app.post(API + WhoAmIRequest.path, async (req, res) => {
     let userData = req.session.userData
     res.header('Content-Type', 'application/json')
-    
+    let request: WhoAmIRequest
+
     if(userData && userData.userId){
         let user = await User.findByPk(userData.userId)
-        res.send(JSON.stringify({
-            success: true,
-            message: "Estas registrado",
-            user: {
-                id: user.id,
-                name: user.name,
-                surname: user.surname,
-                username: user.username,
-                email: user.email,
-                permissionLevel: user.permissionLevel
-            }
-        }))
+        request = new WhoAmIRequest(true, "Estas registrado", true, {
+            id: user.id,
+            name: user.name,
+            surname: user.surname,
+            username: user.username,
+            email: user.email,
+            permissionLevel: user.permissionLevel
+        })
     } else {
-        res.send(JSON.stringify({
-            success: true,
-            message: "No estas registrado",
-            user: null
-        }))
+        request = new WhoAmIRequest(false, "No estas registrado", false)
     }
+    res.send(request.toJson())
 })
 
-app.post(API + 'register', async (req, res) => {
+app.post(API + RegisterRequest.path, async (req, res) => {
     let userData = req.session.userData
     res.header('Content-Type', 'application/json')
+    let request: RegisterRequest
 
     if(userData && userData.userId){
         res.send(JSON.stringify({
@@ -50,49 +50,39 @@ app.post(API + 'register', async (req, res) => {
         //ningun campo vacio
         for(let param of reqParams){
             if(!inData[param] || inData[param] == ""){
-                res.send(JSON.stringify({
-                    success: false,
-                    message: `Falta el campo ${param}`
-                }))
+                request = new RegisterRequest(false, `Falta el campo ${param}`, param as RegisterValidField)
+                res.send(request.toJson())
                 return
             }
         }
 
         if(await User.findOne({where: { email: inData.email }})){
-            res.send(JSON.stringify({
-                success: false,
-                message: "El email ya esta en uso"
-            }))
+            request = new RegisterRequest(false, "El email ya esta en uso", "email")
+            res.send(request.toJson())
             return
         }else if(await User.findOne({where: { username: inData.username }})){
-            res.send(JSON.stringify({
-                success: false,
-                message: "El nombre de usuario ya esta en uso"
-            }))
+            request = new RegisterRequest(false, "El nombre de usuario ya esta en uso", "username")
+            res.send(request.toJson())
             return
         }
 
-        if(inData.name.length < 3 || inData.surname.length < 3 || inData.username.length < 3){
-            res.send(JSON.stringify({
-                success: false,
-                message: "El nombre, apellido o nombre de usuario debe tener al menos 3 caracteres"
-            }))
-            return
+        for(let param of ["name", "surname", "username"]){
+            if(inData[param].length < 3){
+                request = new RegisterRequest(false, `El ${param} debe tener al menos 3 caracteres`, param as RegisterValidField)
+                res.send(request.toJson())
+                return
+            }
         }
 
         if(inData.password.length < 6){
-            res.send(JSON.stringify({
-                success: false,
-                message: "La contrasena debe tener al menos 8 caracteres"
-            }))
+            request = new RegisterRequest(false, "La contrasena debe tener al menos 6 caracteres", "password")
+            res.send(request.toJson())
             return
         }
 
         if(inData.password != inData.password2){
-            res.send(JSON.stringify({
-                success: false,
-                message: "Las contrasenas no coinciden"
-            }))
+            request = new RegisterRequest(false, "Las contrasenas no coinciden", "password2")
+            res.send(request.toJson())
             return
         }
         
@@ -111,30 +101,25 @@ app.post(API + 'register', async (req, res) => {
             userId: user.id
         }
 
-        res.send(JSON.stringify({
-            success: true,
-            message: "Éxito al registrar",
-            user: {
-                id: user.id,
-                name: user.name,
-                surname: user.surname,
-                username: user.username,
-                email: user.email,
-                permissionLevel: user.permissionLevel
-            }
-        }))
+        request = new RegisterRequest(true, "Éxito al registrar", null, {
+            id: user.id,
+            name: user.name,
+            surname: user.surname,
+            username: user.username,
+            email: user.email,
+            permissionLevel: user.permissionLevel
+        })
+        res.send(request.toJson())
     }
 })
 
-app.post(API + 'login', async (req, res) => {
+app.post(API + LoginRequest.path, async (req, res) => {
     let userData = req.session.userData
     res.header('Content-Type', 'application/json')
+    let request: LoginRequest
 
     if(userData && userData.userId){
-        res.send(JSON.stringify({
-            success: false,
-            message: "Ya estás registrado"
-        }))
+        request = new LoginRequest(false, "Ya estás registrado")
     } else {
 
         let inData = req.body
@@ -143,10 +128,8 @@ app.post(API + 'login', async (req, res) => {
         //ningun campo vacio
         for(let param of reqParams){
             if(!inData[param] || inData[param] == ""){
-                res.send(JSON.stringify({
-                    success: false,
-                    message: `Falta el campo ${param}`
-                }))
+                request = new LoginRequest(false, `Falta el campo ${param}`, param as LoginValidField)
+                res.send(request.toJson())
                 return
             }
         }
@@ -154,18 +137,14 @@ app.post(API + 'login', async (req, res) => {
         let user = await User.findOne({where: { [Op.or]: [{ username: inData.userOrEmail }, { email: inData.userOrEmail }] }})
         
         if(!user){
-            res.send(JSON.stringify({
-                success: false,
-                message: "Nombre de usuario o email incorrecto"
-            }))
+            request = new LoginRequest(false, "Nombre de usuario o email incorrecto", "userOrEmail")
+            res.send(request.toJson())
             return
         }
 
         if(!bcrypt.compareSync(inData.password, user.password)){
-            res.send(JSON.stringify({
-                success: false,
-                message: "Contrasena incorrecta"
-            }))
+            request = new LoginRequest(false, "Contrasena incorrecta", "password")
+            res.send(request.toJson())
             return
         }
 
@@ -173,33 +152,31 @@ app.post(API + 'login', async (req, res) => {
             userId: user.id
         }
 
-        res.send(JSON.stringify({
-            success: true,
-            message: "Éxito al iniciar sesion",
-            user: {
-                id: user.id,
-                name: user.name,
-                surname: user.surname,
-                username: user.username,
-                email: user.email,
-                permissionLevel: user.permissionLevel
-            }
-        }))
+        request = new LoginRequest(true, "Éxito al iniciar sesion", null, {
+            id: user.id,
+            name: user.name,
+            surname: user.surname,
+            username: user.username,
+            email: user.email,
+            permissionLevel: user.permissionLevel
+        })
     }
+
+    res.send(request.toJson())
 })
 
-app.post(API + 'logout', (req, res) => {
+app.post(API + LogoutRequest.path, (req, res) => {
     let userData = req.session.userData
     res.header('Content-Type', 'application/json')
     
     if(userData && userData.userId){
         userData.userId = null
+        let request = new LogoutRequest(true, "Éxito al cerrar sesion")
+        res.send(request.toJson())
+    }else{
+        let request = new LogoutRequest(false, "No estas registrado")
+        res.send(request.toJson())
     }
-
-    res.send(JSON.stringify({
-        success: false,
-        message: "Sesión cerrada"
-    }))
 })
 
 export class RestController {

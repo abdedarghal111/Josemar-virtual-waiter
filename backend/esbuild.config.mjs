@@ -18,6 +18,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const __dist = path.join(__dirname, '..', 'dist')
 const __src = path.join(__dirname, 'src')
+const __shared = path.join(__dirname, '..', 'shared')
 
 let checkParam = par => process.argv.find(val => val === par)
 
@@ -27,7 +28,7 @@ if (existsSync(__dist) && !checkParam('--no-clean')) {
   let emptyDist = files.length === 0 || (files.length === 1 && files[0] === 'data')
   if(!emptyDist){console.log('\n==> Limpiando carpeta de compilación...'.yellow)}
   for (const file of files) {
-    if (file !== 'static' && file !== 'node_modules') {
+    if (file !== 'static' && file !== 'node_modules' && file !== 'package.json') {
       const filePath = path.join(__dist, file)
       rmSync(filePath, { recursive: true, force: true })
       console.log(`  -> ${file} borrado`.cyan)
@@ -39,7 +40,7 @@ if (existsSync(__dist) && !checkParam('--no-clean')) {
 
 if (checkParam('--dev')) {
   // configuración para produccion
-  await esbuild.context({
+  let ctx = await esbuild.context({
     logLevel: 'info',
     entryPoints: [`${__src}/**/*.mts`],
     sourceRoot: __src,
@@ -57,7 +58,16 @@ if (checkParam('--dev')) {
     tsconfig: './tsconfig.json',
     plugins: [
       replace({
-        '.mts': '.mjs'
+        '.mts': '.mjs',
+        "_shared/": (...args) => {
+          const filePath = args[0];
+          const __filename = fileURLToPath("file://" + filePath);
+          const __dirname = path.dirname(__filename);
+          // console.log(filePath)
+          const relativePath = path.relative(__dirname, __src+'/shared');
+          // console.log(relativePath)
+          return relativePath.replace('\\', '/') + "/"
+        }
       }),
       copy({
         assets: [
@@ -68,13 +78,41 @@ if (checkParam('--dev')) {
         ],
       })
     ]
-  }).catch(() => process.exit(1)).then(ctx => ctx.watch())
+  })
+
+  let ctxShared = await esbuild.context({
+    logLevel: 'info',
+    entryPoints: [`${__shared}/**/*.mts`],
+    sourceRoot: __shared,
+    outdir: `${__dist}/shared`,
+    bundle: false,
+    sourcemap: false,
+    target: 'es2022',
+    platform: 'node',
+    format: 'esm',
+    outExtension: {
+      '.js': '.mjs'
+    },
+    resolveExtensions: ['.mts'],
+    tsconfig: './tsconfig.json',
+    plugins: [
+      replace({
+        '.mts': '.mjs',
+      }),
+    ]
+  })
+
+  await (async () => {
+    ctx.watch()
+    ctxShared.watch()
+  })()
+
   // copyFileSync(`${__src}/../node_modules`, `${__dist}/node_modules`)
 } else if (checkParam('--production')) {
   // configuración para desarrollo
   await esbuild.build({
     logLevel: 'info',
-    entryPoints: [`${__src}/app.mts`],
+    entryPoints: [`${__src}/app.mts`, {in: `${__src}/*.mts`, out: `${__dist}/app.mjs`}],
     sourceRoot: __src,
     outdir: __dist,
     bundle: true,

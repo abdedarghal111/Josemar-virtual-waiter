@@ -10,7 +10,7 @@
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": false,
+    "noEmit": true,
 
     /* Linting */
     "strict": true,
@@ -18,8 +18,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "allowImportingTsExtensions": true,
 
-    "composite": true
+    "composite": true,
+    "baseUrl": ".",
+
+    "paths": {
+        "_shared/*": ["../shared/src/*"]
+    }
   },
   "include": ["vite.config.mjs"],
   "exclude": ["node_modules"],

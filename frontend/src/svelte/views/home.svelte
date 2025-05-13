@@ -6,10 +6,11 @@
 
     import { setCurrentView } from '../lib/viewsCollector'
     import View from '../components/View.svelte'
-    import { setUser, userdata } from '../lib/userdata.svelte';
+    import { isLogged, logout, userdata } from '../lib/userdata.svelte';
     import TittleHeader from '../partials/TittleHeader.svelte';
     import toast from 'svelte-french-toast';
     import axios from 'axios';
+    import { LogoutRequest } from '_shared/requests/LogoutRequest.mjs';
 
     const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
     const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
@@ -37,7 +38,7 @@
             </div>
 
             <div class={"flex flex-col items-center p-5 mb-10 " + pClass}>
-                {#if !$userdata.logged}
+                {#if !isLogged()}
                     <button class={"flex items-center gap-2 mb-5 " + bClass} onclick={() => setCurrentView('register')}>
                         <Fa icon={faUserPlus} size="lg" /> Registrarse
                     </button>
@@ -51,7 +52,7 @@
                     <Fa icon={faBurger} size="lg" /> Ver la carta
                 </button>
 
-                {#if $userdata.logged}
+                {#if isLogged()}
                     <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('reserve')}>
                         <Fa icon={faCalendarDays} size="lg" /> Realizar o ver reserva
                     </button>
@@ -60,12 +61,12 @@
                     () => {
                         axios({
                             method: "post",
-                            url: `${window.location.origin}/api/logout`,
+                            url: `${window.location.origin}/api/${LogoutRequest.path}`,
                             headers: {
                                 "Content-Type": "application/json",
                             }
                         }).then(() => {
-                            setUser({}, false)
+                            logout()
                             toast.success("Sesion cerrada")
                         }).catch(() => {
                             toast.error("Error en la red")

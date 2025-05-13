@@ -15,9 +15,15 @@
     "checkJs": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "composite": true,
 
-    "composite": true
+    "baseUrl": ".",
+    "paths": {
+      "_shared/*": ["../shared/src/*"]
+    },
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "src/lib/primus.jsx"],
+  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "src/lib/primus.jsx", "../shared/src/**/*.mts"],
   "allowImportingTsExtensions": true
 }

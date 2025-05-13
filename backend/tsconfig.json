@@ -5,7 +5,7 @@
         "target": "ES2022",
         "moduleResolution": "node",
         "outDir": "./../dist",
-        "rootDir": "./src",
+        "rootDir": "../",
         "baseUrl": ".",
         "strict": false,
         "esModuleInterop": true,
@@ -16,7 +16,10 @@
         "allowSyntheticDefaultImports": true,
         "noEmit": true,
         "allowImportingTsExtensions": true,
-        "verbatimModuleSyntax": false // para eliminar imports vacíos
+        "verbatimModuleSyntax": false, // para eliminar imports vacíos
+        "paths": {
+            "_shared/*": ["../shared/src/*"]
+        }
     },
     
     "include": ["src"],

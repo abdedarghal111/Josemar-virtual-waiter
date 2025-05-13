@@ -5,10 +5,11 @@
 
   import { setCurrentView, setPreviusView } from "../lib/viewsCollector";
   import View from "../components/View.svelte";
-  import { checkSesion, isLogged, setUser } from "../lib/userdata.svelte";
+  import { checkSesion, isLogged, userdata } from "../lib/userdata.svelte";
   import TittleHeader from "../partials/TittleHeader.svelte";
     import toast from "svelte-french-toast";
     import Axios from "axios";
+    import { LoginRequest } from "_shared/requests/LoginRequest.mjs";
 
   const pClass = "bg-surface-100 dark:bg-surface-800 rounded-md w-fit";
   const bClass = "bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md";
@@ -33,7 +34,7 @@
     toast.promise(
         Axios({
         method: "post",
-        url: `${window.location.origin}/api/login`,
+        url: `${window.location.origin}/api/${LoginRequest.path}`,
         headers: {
             "Content-Type": "application/json",
         },
@@ -41,15 +42,15 @@
     }),{
         loading: "Cargando...",
         success: (response) => {
-            let received = response.data
-            if(received.success){
-                setUser(received.user)
-                setPreviusView()
-                return received.message
-            }else{
-                err = received.message
-                throw new Error(received.msg)
-            }
+          let request = LoginRequest.getFromResponse(response)
+          if(request.isOk()){
+            userdata.set(request.getUser())
+            setPreviusView()
+            return request.getMessage()
+          }else{
+              err = `${request.getBadField()}: ${request.getMessage()}`
+              throw new Error()
+          }
         },
         error: () => err
     }).finally(async () => {

@@ -7,15 +7,20 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+const __shared = resolve(__dirname, '..', 'shared')
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     tailwindcss(), 
     svelte(),
-
     viteSingleFile()
   ],
+  resolve: {
+    'alias': {
+      '_shared': `${__shared}/src`
+    }
+  },
   build: {
     target: 'modules',
     outDir: '../dist/static',

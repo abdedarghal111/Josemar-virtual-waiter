@@ -2,56 +2,48 @@ import Axios from "axios"
 import toast from "svelte-french-toast"
 import { storable } from "./storable"
 import { get } from "svelte/store"
+import { type PrivateUser } from "_shared/SharedTypes.mjs"
+import { WhoAmIRequest } from "_shared/requests/WhoAmIRequest.mts"
 
-export let userdata = storable('userdata', {
-    id: 0,
+export let userdata = storable<PrivateUser>('userdata', {
+    id: undefined,
     name: '',
     surname: '',
     username: '',
     email: '',
-    logged: false,
     permissionLevel: 'user'
 })
 
 export function isLogged() {
-    return get(userdata).logged
+    return get(userdata).id !== undefined
 }
 
-// export function getUser() {
-//     return userdata
-// }
-
-export function setUser(user: any, logged: boolean = true) {
-    let emptyUser: any = {
-        id: 0,
-        name: '',
-        surname: '',
-        username: '',
-        email: '',
-        logged: logged,
-        permissionLevel: 'user'
-    }
-
-    for(let key in user){
-        emptyUser[key] = user[key]
-    }
-
-    userdata.set(emptyUser)
+export function logout() {
+    userdata.set({
+    id: undefined,
+    name: '',
+    surname: '',
+    username: '',
+    email: '',
+    permissionLevel: 'user'
+})
 }
 
 export async function checkSesion() {
     Axios({
             method: "post",
-            url: `${window.location.origin}/api/whoAmI`,
+            url: `${window.location.origin}/api/${WhoAmIRequest.path}`,
             headers: {
                 "Content-Type": "application/json",
             }
     }).then((response) => {
-        let data = response.data
-        if(data.user){
-            setUser(data.user)
+        let request = WhoAmIRequest.getFromResponse(response)
+
+        console.log(request)
+        if(request.isLogged()){
+            userdata.set(request.getUser())
         }else{
-            setUser({}, false)
+            logout()
         }
     }).catch((error) => {
         toast.error("Error en la red, reintentar mas tarde")

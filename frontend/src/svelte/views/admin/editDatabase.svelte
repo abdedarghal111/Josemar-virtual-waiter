@@ -5,7 +5,6 @@
 </script>
 
 <View>
-
     {#snippet header()}
         <TittleHeader tittle="Josemar virtual waiter" />
     {/snippet}

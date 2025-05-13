@@ -5,7 +5,7 @@
 
   import { setCurrentView, setPreviusView } from "../lib/viewsCollector";
   import View from "../components/View.svelte";
-  import { checkSesion, isLogged, userdata } from "../lib/userdata.svelte";
+  import { checkSesion, userdata } from "../lib/userdata.svelte";
   import TittleHeader from "../partials/TittleHeader.svelte";
     import toast from "svelte-french-toast";
     import Axios from "axios";
@@ -15,7 +15,7 @@
   const bClass = "bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md";
   // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
 
-  if(isLogged()){
+  if($userdata.id){
     setPreviusView()
   }
 
@@ -72,13 +72,13 @@
         <form on:submit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
             <label class="label">
                 <span class="label-text text-lg">Nombre de usuario o email</span>
-                <input id="login/userOrEmail" type="text" class="input input-bordered w-full" placeholder="Introduce tu usuario o email" />
+                <input id="login/userOrEmail" autocomplete="username" type="text" class="input input-bordered w-full" placeholder="Introduce tu usuario o email" />
             </label>
 
 
             <label class="label">
                 <span class="label-text text-lg">Contraseña</span>
-                <input id="login/password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
+                <input id="login/password" autocomplete="current-password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
             </label>
 
             <div class="flex flex-col items-center">

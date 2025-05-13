@@ -5,7 +5,7 @@
 
   import { setCurrentView, setPreviusView } from "../lib/viewsCollector";
   import View from "../components/View.svelte";
-  import { checkSesion, isLogged, userdata } from "../lib/userdata.svelte";
+  import { checkSesion, userdata } from "../lib/userdata.svelte";
   import TittleHeader from "../partials/TittleHeader.svelte";
     import toast from "svelte-french-toast";
     import Axios from "axios";
@@ -15,12 +15,16 @@
   const bClass = "bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md";
   // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
 
-  if(isLogged()){
+  if($userdata.id){
     setPreviusView()
   }
 
-  async function onSubmit(this: HTMLButtonElement) {
-    this.disabled = true
+  async function onSubmit(ev: Event) {
+
+    ev.preventDefault()
+
+    let submit = document.getElementById("register/submit") as HTMLInputElement
+    submit.disabled = true
 
     let sendData = {
       name: (document.getElementById("register/name") as HTMLInputElement)?.value,
@@ -55,7 +59,7 @@
         },
         error: () => err
     }).finally(() => {
-        this.disabled = false
+        submit.disabled = false
     })
   }
 </script>
@@ -70,39 +74,41 @@
     <div class={"flex flex-col items-center p-5 " + pClass}>
       <div class="h-full flex flex-col items-center gap-5">
 
-        <form class="w-[70vw] sm:w-md space-y-4">
+        <form on:submit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
             <label class="label">
                 <span class="label-text text-lg">Nombre</span>
-                <input id="register/name" type="text" class="input input-bordered w-full" placeholder="Introduce tu nombre" />
+                <input id="register/name" autocomplete="name" type="text" class="input input-bordered w-full" placeholder="Introduce tu nombre" />
             </label>
 
             <label class="label">
                 <span class="label-text text-lg">Apellidos</span>
-                <input id="register/surname" type="text" class="input input-bordered w-full" placeholder="Introduce tus apellidos" />
+                <input id="register/surname" autocomplete="family-name" type="text" class="input input-bordered w-full" placeholder="Introduce tus apellidos" />
             </label>
 
             <label class="label">
                 <span class="label-text text-lg">Nombre de usuario</span>
-                <input id="register/username" type="text" class="input input-bordered w-full" placeholder="Introduce tu nombre de usuario" />
+                <input id="register/username" autocomplete="username" type="text" class="input input-bordered w-full" placeholder="Introduce tu nombre de usuario" />
             </label>
 
             <label class="label">
                 <span class="label-text text-lg">Email</span>
-                <input id="register/email" type="email" class="input input-bordered w-full" placeholder="Introduce tu email" />
+                <input id="register/email" autocomplete="email" type="email" class="input input-bordered w-full" placeholder="Introduce tu email" />
             </label>
 
             <label class="label">
                 <span class="label-text text-lg">Contraseña</span>
-                <input id="register/password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
+                <input id="register/password" autocomplete="current-password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
             </label>
 
             <label class="label">
                 <span class="label-text text-lg">Repetir Contraseña</span>
-                <input id="register/password2" type="password" class="input input-bordered w-full" placeholder="Repite tu contraseña" />
+                <input id="register/password2" autocomplete="current-password" type="password" class="input input-bordered w-full" placeholder="Repite tu contraseña" />
             </label>
-        </form>
 
-        <button class={bClass} onclick={onSubmit}>Enviar</button>
+            <div class="flex flex-col items-center">
+              <input id="register/submit" class={"w-fit " + bClass} type="submit" value="Registrarse"/>
+            </div>
+        </form>
       </div>
     </div>
   </div>

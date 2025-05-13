@@ -25,8 +25,8 @@ export class LoginRequest extends Request {
     }
 
     static getFromResponse(response: any): LoginRequest {
-        let { success, message, user } = response.data
-        return new LoginRequest(success, message, user);
+        let { success, message, badField, user } = response.data
+        return new LoginRequest(success, message, badField, user);
     }
 
     toJson() {

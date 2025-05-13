@@ -14,9 +14,9 @@ export let userdata = storable<PrivateUser>('userdata', {
     permissionLevel: 'user'
 })
 
-export function isLogged() {
-    return get(userdata).id !== undefined
-}
+// export function isLogged() {
+//     return get(userdata).id ?? false
+// }
 
 export function logout() {
     userdata.set({
@@ -39,7 +39,6 @@ export async function checkSesion() {
     }).then((response) => {
         let request = WhoAmIRequest.getFromResponse(response)
 
-        console.log(request)
         if(request.isLogged()){
             userdata.set(request.getUser())
         }else{

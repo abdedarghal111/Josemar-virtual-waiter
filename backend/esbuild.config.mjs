@@ -102,10 +102,18 @@ if (checkParam('--dev')) {
     ]
   })
 
-  await (async () => {
-    ctx.watch()
-    ctxShared.watch()
-  })()
+  if(!checkParam('--watch')){
+    await ctxShared.rebuild()
+    await ctx.rebuild()
+
+    ctx.dispose()
+    ctxShared.dispose()
+  }else{
+    await (async () => {
+      ctx.watch()
+      ctxShared.watch()
+    })()
+  }
 
   // copyFileSync(`${__src}/../node_modules`, `${__dist}/node_modules`)
 } else if (checkParam('--production')) {

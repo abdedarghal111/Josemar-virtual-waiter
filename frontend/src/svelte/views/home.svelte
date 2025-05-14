@@ -11,6 +11,7 @@
     import toast from 'svelte-french-toast';
     import axios from 'axios';
     import { LogoutRequest } from '_shared/requests/LogoutRequest.mjs';
+    import { initConnection } from '../lib/wsComunication';
 
     const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
     const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
@@ -53,7 +54,7 @@
                 </button>
 
                 {#if $userdata.id}
-                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('reserve')}>
+                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => initConnection()}><!-- setCurrentView('reserve')}> -->
                         <Fa icon={faCalendarDays} size="lg" /> Realizar o ver reserva
                     </button>
 

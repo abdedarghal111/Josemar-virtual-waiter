@@ -171,8 +171,10 @@ app.post(API + LogoutRequest.path, (req, res) => {
     
     if(userData && userData.userId){
         userData.userId = null
-        let request = new LogoutRequest(true, "Éxito al cerrar sesion")
-        res.send(request.toJson())
+        req.session.destroy(() => {
+            let request = new LogoutRequest(true, "Éxito al cerrar sesion")
+            res.send(request.toJson())
+        })
     }else{
         let request = new LogoutRequest(false, "No estas registrado")
         res.send(request.toJson())

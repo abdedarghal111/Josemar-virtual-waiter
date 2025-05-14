@@ -6,7 +6,21 @@ let localWS = writable<null | WebSocket>(null)
 
 
 export function initConnection(){
-    localWS.set(new WebSocket(serverWS))
+
+    let ws = new WebSocket(serverWS)
+    localWS.set(ws)
+
+    ws.addEventListener("open", () => {
+        console.log("Connection opened")
+    });
+
+    ws.addEventListener("message", (event) => {
+        console.log("Message from server ", event.data);
+    });
+}
+
+export function existingConnection(){
+    return get(localWS)?.OPEN ?? false
 }
 
 export function closeConnection(){
@@ -15,12 +29,13 @@ export function closeConnection(){
         ws.close()
         localWS.set(null)
     }
+    console.log("Connection closed")
 }
 
-ws.addEventListener("open", () => {
-    ws.send("Hello Server!");
-});
+// ws.addEventListener("open", () => {
+//     ws.send("Hello Server!");
+// });
 
-ws.addEventListener("message", (event) => {
-    console.log("Message from server: ", event.data);
-});
+// ws.addEventListener("message", (event) => {
+//     console.log("Message from server: ", event.data);
+// });

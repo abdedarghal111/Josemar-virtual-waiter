@@ -12,11 +12,13 @@ import helmet from 'helmet';
 dotenv.config({ path: ENV_FILE_PATH })
 
 //userData
+
+export interface UserSessionDataType {
+  [key: string]: any
+}
 declare module 'express-session' {
   interface SessionData {
-    userData?: {
-      [key: string]: any;
-    }
+    userData?: UserSessionDataType
   }
 }
 
@@ -45,9 +47,7 @@ const httpsServer = https.createServer({
 }, app);
 
 // Express config
-app.use(express.static(__public));
-app.use(express.json())
-app.use(session({
+let sessionParser = session({
   secret: process.env.SESION_SIGN_COOKIE_KEY,
   resave: false,
   store: sessionStore,
@@ -56,7 +56,11 @@ app.use(session({
     secure: true,
     // maxAge: 1000 * 60 * 30 // 30 minutos
   }
-}))
+})
+
+app.use(express.static(__public));
+app.use(express.json())
+app.use(sessionParser)
 app.use(helmet(
   {
     contentSecurityPolicy: {
@@ -76,6 +80,7 @@ app.get('/', (req, res) => {
 export class HttpController {
     static express = app
     static server = httpsServer
+    static sessionParser = sessionParser
 
     static startServer() {
         // Iniciar el servidor

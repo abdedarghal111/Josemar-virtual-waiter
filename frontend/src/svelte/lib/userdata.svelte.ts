@@ -4,6 +4,7 @@ import { storable } from "./storable"
 import { get } from "svelte/store"
 import { type PrivateUser } from "_shared/SharedTypes.mjs"
 import { WhoAmIRequest } from "_shared/requests/WhoAmIRequest.mts"
+import { closeConnection, existingConnection, initConnection } from "./wsComunication"
 
 export let userdata = storable<PrivateUser>('userdata', {
     id: undefined,
@@ -18,15 +19,25 @@ export let userdata = storable<PrivateUser>('userdata', {
 //     return get(userdata).id ?? false
 // }
 
+userdata.subscribe((user) => {
+    if(user.id && (user.permissionLevel == 'worker' || user.permissionLevel == 'admin')){
+        if(!existingConnection()){
+            initConnection()
+        }
+    }else{
+        closeConnection()
+    }
+})
+
 export function logout() {
     userdata.set({
-    id: undefined,
-    name: '',
-    surname: '',
-    username: '',
-    email: '',
-    permissionLevel: 'user'
-})
+        id: undefined,
+        name: '',
+        surname: '',
+        username: '',
+        email: '',
+        permissionLevel: 'user'
+    })
 }
 
 export async function checkSesion() {

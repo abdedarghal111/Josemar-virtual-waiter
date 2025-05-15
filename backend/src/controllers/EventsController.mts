@@ -1,5 +1,7 @@
 import WebSocket from "ws"
-import { HelloMessage } from "_shared/wsComunication/HelloMessage.mjs"
+import { ListUsersMessage } from "_shared/wsComunication/ListUsersMessage.mjs"
+import { User } from "./DatabaseController.mts"
+import { BaseMessage } from "_shared/wsComunication/BaseMessage.mjs"
 
 // static class
 export class EventsController {
@@ -16,6 +18,7 @@ export class EventsController {
         this.workerConnections[sessionId] = ws
 
         ws.on('message', (message) => {
+            console.log(message.toString())
             try {
                 const data = JSON.parse(message.toString())
                 const eventName = data?.event
@@ -44,12 +47,22 @@ export class EventsController {
         }
     }
 
+    public static fireSelf(sessionId: string, message: BaseMessage) {
+        this.workerConnections[sessionId].emit(message.event, message.toString())
+    }
+
     public static subscribe(event: string, callback: (sessionId: string, data: any) => void, soloAdmins: boolean = false) {
         this.events[event] = callback
     }
 }
 
-EventsController.subscribe(HelloMessage.event, (sessionId: string, data: any) => {
-    let info = new HelloMessage(data)
-    console.log(info.getMessage())
+EventsController.subscribe(ListUsersMessage.event, async (sessionId: string, data: any) => {   
+    console.log("recibido") 
+    let users = await User.findAll()
+
+    let cleanUsers = users.map(user => user.toJSON())
+
+    let message = new ListUsersMessage({ event: ListUsersMessage.event, success: true, users: cleanUsers })
+    
+    EventsController.fireSelf(sessionId, message)
 })

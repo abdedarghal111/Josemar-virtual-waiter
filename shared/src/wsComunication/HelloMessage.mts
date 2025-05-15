@@ -5,8 +5,10 @@ export interface messageContents extends baseContents {
 }
 
 export class HelloMessage extends BaseMessage {
-    public static event = 'helloMessage'
-    protected contents: messageContents
+    public static event = 'hello'
+    public event = 'hello'
+    
+    protected contents: messageContents = { event: '', success: false, message: '' }
 
     constructor(messageContents: messageContents) {
         super(messageContents)

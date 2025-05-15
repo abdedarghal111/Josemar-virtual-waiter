@@ -1,11 +1,8 @@
-import { Request, Response } from 'express';
-import { HttpController, type UserSessionDataType } from './HttpController.mts';
-import WebSocket, { WebSocketServer } from 'ws'
-import { Session } from 'express-session';
+import { HttpController } from './HttpController.mts';
+import { WebSocketServer } from 'ws'
 import { parse as parseCookie } from 'cookie-parse';
 import { User } from './DatabaseController.mts';
 import { EventsController } from './EventsController.mts';
-import { HelloMessage } from '_shared/wsComunication/HelloMessage.mjs';
 
 const wssServer = new WebSocketServer({
   server: HttpController.server, verifyClient: async (info, verify) => {
@@ -56,13 +53,6 @@ wssServer.on('connection', (ws, req) => {
     EventsController.removeConnection(sessionId)
     ws.removeListener('error', onSocketError);
   })
-
-  let message = new HelloMessage({ 
-    event: HelloMessage.event,
-    success: true,
-    message: "Hola mundo desde un websocket" 
-  })
-  ws.send(message.toString())
 })
 
 export class SocketController {

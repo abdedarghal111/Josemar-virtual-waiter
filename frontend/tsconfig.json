@@ -1,15 +1,12 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
-        "_shared/*": ["../shared/src/*"]
+        "_shared/*": ["../shared/src/*"],
+        "@src/*": ["src/svelte/*"]
     }
-  }
+  },
+  "include": ["src"]
 }

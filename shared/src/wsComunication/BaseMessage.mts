@@ -4,8 +4,10 @@ export interface baseContents {
 }
 
 export class BaseMessage {
-    public static event = 'baseMessage'
-    protected contents: baseContents
+    public static event = 'base'
+    public event = 'base'
+    
+    protected contents: baseContents = { event: '', success: false }
 
     // parse contents
     constructor(baseContents: baseContents) {

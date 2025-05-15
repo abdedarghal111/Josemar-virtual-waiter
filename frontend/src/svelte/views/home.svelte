@@ -1,16 +1,3 @@
-<script lang="ts" module>
-    let message = $state('')
-
-    onSocketEvent(HelloMessage.event, (data, socket) => {
-        let info = new HelloMessage(data)
-
-        message = info.getMessage()
-
-        info = new HelloMessage({ event: HelloMessage.event, success: true, message: "Hola mundo desde un websocket en el cliente" })
-        socket.send(info.toString())
-    })
-</script>
-
 <script lang='ts'>
     import Fa from 'svelte-fa'
     import { faCalendarDays, faAddressCard, faUserPlus, faBurger, faDoorOpen, faBriefcase } from '@fortawesome/free-solid-svg-icons'
@@ -25,11 +12,6 @@
     import axios from 'axios';
     import { LogoutRequest } from '_shared/requests/LogoutRequest.mjs';
     import { initConnection, onSocketEvent } from '../lib/wsComunication';
-    import { HelloMessage } from '_shared/wsComunication/HelloMessage.mjs';
-
-    $effect(() => {
-        console.log(message)
-    })
 
     const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
     const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'

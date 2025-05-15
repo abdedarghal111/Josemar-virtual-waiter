@@ -18,7 +18,8 @@ export default defineConfig({
   ],
   resolve: {
     'alias': {
-      '_shared': `${__shared}/src`
+      '_shared': `${__shared}/src`,
+      "@src": resolve(__dirname, 'src', 'svelte')
     }
   },
   build: {

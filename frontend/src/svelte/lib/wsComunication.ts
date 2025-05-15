@@ -1,19 +1,32 @@
-import type { BaseMessage } from "_shared/wsComunication/baseMessage.mjs";
 import toast from "svelte-french-toast";
 import { get, writable } from "svelte/store";
 
 export const serverWS = `wss://${window.location.host}`
 
-let localWS = writable<null | WebSocket>(null)
+export let socket = writable<null | WebSocket>(null)
 type messageCallbackType = (data: any, ws: WebSocket) => void
 let eventSubscriptions: Record<string, messageCallbackType> = {}
+
+let resolve: () => void
+let resolved = false
+let awaitSocket = new Promise<void>((res, reject) => {
+    resolve = res
+})
+export async function getSocket(){
+    if(!resolved){
+        await awaitSocket
+    }
+    return get(socket)
+}
 
 export function initConnection(){
 
     let ws = new WebSocket(serverWS)
-    localWS.set(ws)
+    socket.set(ws)
 
     ws.addEventListener("open", () => {
+        resolved = true
+        resolve()
         toast.success("Conectado correctamente")
     });
 
@@ -27,11 +40,12 @@ export function initConnection(){
         } else {
             toast.error(`Error de conexión (código ${event.code}): ${event.reason || 'Conexión rechazada'}`);
         }
-        localWS.set(null);
+        socket.set(null);
     })
 
     ws.addEventListener("message", (event) => {
         try {
+            console.log(event)
             const data = JSON.parse(event.data)
             const eventName = data?.event
 
@@ -53,13 +67,13 @@ export function onSocketEvent(event: string, callback: messageCallbackType) {
 }
 
 export function existingConnection(){
-    return get(localWS)?.OPEN ?? false
+    return get(socket)?.OPEN ?? false
 }
 
 export function closeConnection(){
-    let ws = get(localWS)
+    let ws = get(socket)
     if(ws?.OPEN){
         ws.close()
-        localWS.set(null)
+        socket.set(null)
     }
 }

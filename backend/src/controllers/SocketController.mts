@@ -1,63 +1,69 @@
 import { Request, Response } from 'express';
 import { HttpController, type UserSessionDataType } from './HttpController.mts';
-import { WebSocketServer } from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import { Session } from 'express-session';
+import { parse as parseCookie } from 'cookie-parse';
 import { User } from './DatabaseController.mts';
+import { EventsController } from './EventsController.mts';
+import { HelloMessage } from '_shared/wsComunication/HelloMessage.mjs';
 
-let sockets = {}
-let socketsCount = 0
+const wssServer = new WebSocketServer({
+  server: HttpController.server, verifyClient: async (info, verify) => {
 
-const wssServer = new WebSocketServer({ server: HttpController.server })
+    let sessionId = parseCookie(info.req.headers.cookie)['connect.sid'].substring(2).split('.')[0]
 
-// wssServer.options.verifyClient = (info, callback) => {
-//   console.log(info, callback)
-// }
+    HttpController.sessionStore.get(sessionId, async (err, session) => {
+      if (err || !session) {
+        info.req.socket.destroy()
+        verify(false, 401)
+        return
+      }
 
-HttpController.server.on('upgrade', function (request, socket, head) {
-  socket.on('error', (err) => { console.error(err) })
+      let userData = session?.userData
+      if (!userData || !userData.userId) {
+        verify(false, 401)
+        return
+      }
 
-  console.log('Parsing session from request...');
-  HttpController.sessionParser(request as Request<{}, any, any, any, Record<string, any>>, {} as Response<any, Record<string, number>>, async () => {
-    let userData = (request as any).session.userData as UserSessionDataType
-    console.log(userData)
-    if(!userData.userId) {
-      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-      socket.destroy();
-      return;
-    }
+      let user = await User.findByPk(userData.userId)
 
-    console.log("primera capa superada")
-    let user = await User.findByPk(userData.userId)
-    console.log(user)
+      if (user.permissionLevel == "user") {
+        verify(false, 401)
+        return
+      }
 
-    if(user.permissionLevel == "user"){
-      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-      socket.destroy();
-      return;
-    }
+      (info.req as any).handshake = {
+        sessionId: sessionId,
+        permissionLevel: user.permissionLevel
+      }
 
-    console.log('Session is parsed!');
+      verify(true)
+    })
+  }
+})
 
-    // socket.removeListener('error', (err) => { console.error(err) });
+let onSocketError = (err) => { console.error(err) }
 
-    wssServer.handleUpgrade(request, socket, head, function (ws) {
-      wssServer.emit('connection', ws, request);
-    });
-  });
-});
+wssServer.on('connection', (ws, req) => {
+  const sessionId = (req as any).handshake.sessionId
+  const permissionLevel = (req as any).handshake.permissionLevel
 
+  EventsController.addConnection(sessionId, permissionLevel, ws)
 
-// wssServer.on("connection", (ws, req) => {
+  ws.on('error', onSocketError)
 
-//   // ws.
-//   // let userData = req.session.userData
-//   console.log("Client connected");
-//   console.log(req)
-//   ws.on("message", (message) => {
-//     console.log("received: %s", message);
-//     ws.send("Hello from secure server!");
-//   });
-// });
+  ws.on('close', () => {
+    EventsController.removeConnection(sessionId)
+    ws.removeListener('error', onSocketError);
+  })
+
+  let message = new HelloMessage({ 
+    event: HelloMessage.event,
+    success: true,
+    message: "Hola mundo desde un websocket" 
+  })
+  ws.send(message.toString())
+})
 
 export class SocketController {
   static server = wssServer

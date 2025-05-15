@@ -2,6 +2,7 @@ import './controllers/DatabaseController.mjs'
 import './controllers/HttpController.mjs'
 import './controllers/RestController.mjs'
 import './controllers/SocketController.mjs'
+import './controllers/EventsController.mjs'
 
 import { HttpController } from './controllers/HttpController.mts'
 import { User } from './controllers/DatabaseController.mjs'

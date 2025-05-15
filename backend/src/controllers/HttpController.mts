@@ -81,6 +81,7 @@ export class HttpController {
     static express = app
     static server = httpsServer
     static sessionParser = sessionParser
+    static sessionStore = sessionStore
 
     static startServer() {
         // Iniciar el servidor

@@ -1,6 +1,7 @@
 import { Op } from "sequelize"
 import { User } from "./DatabaseController.mts"
 import { HttpController } from "./HttpController.mts"
+import { EventsController } from "./EventsController.mts"
 import bcrypt from "bcrypt"
 import { LoginRequest, type ValidFields as LoginValidField } from "_shared/requests/LoginRequest.mjs"
 import { RegisterRequest, type ValidFields as RegisterValidField } from "_shared/requests/RegisterRequest.mjs"
@@ -170,6 +171,7 @@ app.post(API + LogoutRequest.path, (req, res) => {
     res.header('Content-Type', 'application/json')
     
     if(userData && userData.userId){
+        EventsController.removeConnection(userData.userId)
         userData.userId = null
         req.session.destroy(() => {
             let request = new LogoutRequest(true, "Éxito al cerrar sesion")

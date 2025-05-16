@@ -1,22 +1,46 @@
 import toast from "svelte-french-toast";
 import { get, writable } from "svelte/store";
+import { BaseMessage } from "_shared/wsComunication/BaseMessage.mts";
 
 export const serverWS = `wss://${window.location.host}`
 
-export let socket = writable<null | WebSocket>(null)
+let socket = writable<null | WebSocket>(null)
 type messageCallbackType = (data: any, ws: WebSocket) => void
 let eventSubscriptions: Record<string, messageCallbackType> = {}
+let waitSubscriptions: Record<string, (() => void)[]> = {}
 
-let resolve: () => void
-let resolved = false
-let awaitSocket = new Promise<void>((res, reject) => {
+export async function sendEvent(message: BaseMessage) {
+    let socket = await getWebSocket()
+    console.log(`toServer: ${message.toString()}`)
+    socket.send(message.toString())
+}
+
+let resolve: (value: WebSocket) => void
+let webSocket = new Promise<WebSocket>((res, reject) => {
     resolve = res
 })
-export async function getSocket(){
-    if(!resolved){
-        await awaitSocket
+
+export async function waitEvent(event: string) {
+    let resolve: () => void
+    let prom = new Promise<void>((res, reject) => {
+        resolve = res
+    })
+    if(!waitSubscriptions[event]){
+        waitSubscriptions[event] = []
     }
-    return get(socket)
+    waitSubscriptions[event].push(resolve)
+
+    return prom
+}
+
+export async function getWebSocket() : Promise<WebSocket> {
+    if(!webSocket) {
+        webSocket = new Promise<WebSocket>((res, reject) => {
+            resolve = res
+        })
+        initConnection()
+    }
+    return webSocket
 }
 
 export function initConnection(){
@@ -24,9 +48,12 @@ export function initConnection(){
     let ws = new WebSocket(serverWS)
     socket.set(ws)
 
+    webSocket = new Promise<WebSocket>((res, reject) => {
+        resolve = res
+    })
+
     ws.addEventListener("open", () => {
-        resolved = true
-        resolve()
+        resolve(ws)
         toast.success("Conectado correctamente")
     });
 
@@ -44,12 +71,18 @@ export function initConnection(){
     })
 
     ws.addEventListener("message", (event) => {
+        console.log(`fromServer: ${event.data}`)
         try {
-            console.log(event)
             const data = JSON.parse(event.data)
             const eventName = data?.event
 
             if (eventName in eventSubscriptions) {
+                if(waitSubscriptions[eventName]){
+                    for(let resolve of waitSubscriptions[eventName]){
+                        resolve()
+                    }
+                    waitSubscriptions[eventName] = []
+                }
                 eventSubscriptions[eventName](data, ws)
             } else if (data) {
                 console.error(`No existe el evento ${eventName} en el cliente para los datos: ${data}`)

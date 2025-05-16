@@ -12,8 +12,8 @@ export class HelloMessage extends BaseMessage {
 
     constructor(messageContents: messageContents) {
         super(messageContents)
-        let { event, success, message } = messageContents
-        this.contents = { event, success, message }
+        let { success, message } = messageContents
+        this.contents = { event: this.event, success, message }
     }
 
     getMessage(): string {

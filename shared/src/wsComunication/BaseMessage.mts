@@ -11,8 +11,8 @@ export class BaseMessage {
 
     // parse contents
     constructor(baseContents: baseContents) {
-        let { event, success } = baseContents
-        this.contents = { event, success }
+        let { success } = baseContents
+        this.contents = { event: this.event, success }
     }
 
     isOk(): boolean {

@@ -13,8 +13,8 @@ export class ListUsersMessage extends BaseMessage {
 
     constructor(messageContents: listUsersContents) {
         super(messageContents)
-        let { event, success, users } = messageContents
-        this.contents = { event, success, users }
+        let { success, users } = messageContents
+        this.contents = { event: this.event, success, users }
     }
 
     getUsers(): UserAttributes[] {

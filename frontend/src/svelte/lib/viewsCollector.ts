@@ -18,13 +18,24 @@ import WorkerCheffMode from '../views/workers/cheffMode.svelte';
 
 import AdminEditDatabase from '../views/admin/editDatabase.svelte';
 import AdminListUsers from '../views/admin/listUsers.svelte';
+import AdminUser from '../views/admin/user.svelte';
 
-export let currentView = storable('currentView', 'home')
+export let currentView = storable<string>('currentView', 'home')
+export let parameters = storable<{ [key: string]: any }>('parameters', {})
 let previusView = get(currentView)
 
-export function setCurrentView(view: string) {
+export function setCurrentView(view: string, newParams: { [key: string]: any } = {}) {
     previusView = get(currentView)
+    parameters.set(newParams)
     currentView.set(view)
+}
+
+export function getParameters() {
+    return get(parameters)
+}
+
+export function getCurrentView() {
+    return get(currentView)
 }
 
 export function setPreviusView(){
@@ -53,4 +64,5 @@ export const views = {
 
     "admin.editDatabase": AdminEditDatabase,
     "admin.listUsers": AdminListUsers,
+    "admin.user": AdminUser,
 }

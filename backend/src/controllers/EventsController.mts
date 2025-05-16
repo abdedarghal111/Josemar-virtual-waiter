@@ -18,7 +18,7 @@ export class EventsController {
         this.workerConnections[sessionId] = ws
 
         ws.on('message', (message) => {
-            console.log(message.toString())
+            console.log(`fromClient: ${message.toString()} \n`)
             try {
                 const data = JSON.parse(message.toString())
                 const eventName = data?.event
@@ -37,18 +37,19 @@ export class EventsController {
 
     public static fireAdmins(event: string, data: any) {
         for(let key in this.adminConnections) {
-            this.adminConnections[key].emit(event, data)
+            this.adminConnections[key].send(event, data)
         }
     }
 
     public static fireWorkers(event: string, data: any) {
         for(let key in this.workerConnections) {
-            this.workerConnections[key].emit(event, data)
+            this.workerConnections[key].send(event, data)
         }
     }
 
     public static fireSelf(sessionId: string, message: BaseMessage) {
-        this.workerConnections[sessionId].emit(message.event, message.toString())
+        console.log(`toClient: ${message.toString()}\n`)
+        this.workerConnections[sessionId].send(message.toString())
     }
 
     public static subscribe(event: string, callback: (sessionId: string, data: any) => void, soloAdmins: boolean = false) {
@@ -56,8 +57,7 @@ export class EventsController {
     }
 }
 
-EventsController.subscribe(ListUsersMessage.event, async (sessionId: string, data: any) => {   
-    console.log("recibido") 
+EventsController.subscribe(ListUsersMessage.event, async (sessionId: string, data: any) => {
     let users = await User.findAll()
 
     let cleanUsers = users.map(user => user.toJSON())

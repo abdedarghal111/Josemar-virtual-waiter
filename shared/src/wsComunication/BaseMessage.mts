@@ -5,21 +5,28 @@ export interface baseContents {
 
 export class BaseMessage {
     public static event = 'base'
-    public event = 'base'
-    
-    protected contents: baseContents = { event: '', success: false }
 
-    // parse contents
-    constructor(baseContents: baseContents) {
-        let { success } = baseContents
-        this.contents = { event: this.event, success }
+    public event: string
+    protected success: boolean
+
+    constructor(event: string, success: boolean) {
+        this.event = event
+        this.success = success
+    }
+
+    static fromTable(table: baseContents): BaseMessage {
+        return new BaseMessage(table.event, table.success)
     }
 
     isOk(): boolean {
-        return this.contents.success
+        return this.success
+    }
+
+    toObject() {
+        return {event: this.event, success: this.success}
     }
 
     toString(): string {
-        return JSON.stringify(this.contents)
+        return JSON.stringify({event: this.event, success: this.success})
     }
 }

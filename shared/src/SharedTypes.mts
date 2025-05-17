@@ -18,3 +18,9 @@ export interface UserAttributes {
   createdAt?: Date
   updatedAt?: Date
 }
+
+export interface anyObject {
+  [key: string]: any
+}
+
+export type validObjectType = 'null' | 'user' | 'order' | 'reservation'

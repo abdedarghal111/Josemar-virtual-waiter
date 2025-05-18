@@ -36,7 +36,7 @@
                     </button>
                 {/if}
 
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.listProducts')}>
+                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.listProducts')}>
                     <Fa icon={faBurger} size="lg" /> Productos
                 </button>
 

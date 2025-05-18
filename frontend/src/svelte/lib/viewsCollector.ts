@@ -19,6 +19,8 @@ import WorkerCheffMode from '../views/workers/cheffMode.svelte';
 import AdminEditDatabase from '../views/admin/editDatabase.svelte';
 import AdminListUsers from '../views/admin/listUsers.svelte';
 import AdminUser from '../views/admin/user.svelte';
+import AdminListProducts from '../views/admin/listProducts.svelte';
+import AdminProduct from '../views/admin/product.svelte';
 
 export let currentView = storable<string>('currentView', 'home')
 export let parameters = storable<{ [key: string]: any }>('parameters', {})
@@ -65,4 +67,6 @@ export const views = {
     "admin.editDatabase": AdminEditDatabase,
     "admin.listUsers": AdminListUsers,
     "admin.user": AdminUser,
+    "admin.listProducts": AdminListProducts,
+    "admin.product": AdminProduct
 }

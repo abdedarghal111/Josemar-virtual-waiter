@@ -1,7 +1,7 @@
 import WebSocket from "ws"
 import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs"
 import { GetObjectMessage, SetObjectMessage, DeleteObjectMessage } from "_shared/wsComunication/ObjectMessage.mjs"
-import { User } from "./DatabaseController.mts"
+import { Product, User } from "./DatabaseController.mts"
 import { BaseMessage } from "_shared/wsComunication/BaseMessage.mjs"
 import bcrypt from "bcrypt"
 
@@ -75,10 +75,25 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
                 return userObject
             })
 
-            let send = new ListObjectsMessage("user", cleanUsers)
+            {
+                let send = new ListObjectsMessage("user", cleanUsers)
             
-            return EventsController.fireSelf(sessionId, send)
-    }    
+                return EventsController.fireSelf(sessionId, send)
+            }
+        case "product":
+            let products = await Product.findAll()
+
+            let cleanProducts = products.map(product => {
+                let productObject = product.toJSON()
+                return productObject
+            })
+
+            {
+                let send = new ListObjectsMessage("product", cleanProducts)
+            
+                return EventsController.fireSelf(sessionId, send)
+            }
+    }   
 })
 
 EventsController.subscribe(GetObjectMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
@@ -101,6 +116,21 @@ EventsController.subscribe(GetObjectMessage.event, async (sessionId: string, isA
                 let cleanUser = foundedUser.toJSON()
                 delete cleanUser.password
                 let send = new GetObjectMessage("user", cleanUser)
+                return EventsController.fireSelf(sessionId, send)
+            }
+        case "product":
+            let product = received.getProduct()
+
+            if(product.id){
+                let foundedProduct = await Product.findByPk(product.id)
+                if(!foundedProduct){
+                    let send = new GetObjectMessage("product", {})
+                    send.setFailure(`Producto con id ${product.id} no encontrado`)
+                    return EventsController.fireSelf(sessionId, send)
+                }
+
+                let cleanProduct = foundedProduct.toJSON()
+                let send = new GetObjectMessage("product", cleanProduct)
                 return EventsController.fireSelf(sessionId, send)
             }
     }
@@ -190,10 +220,76 @@ EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isA
                 return userObject
             })
 
-            let sendAll = new ListObjectsMessage("user", cleanUsers)
-            sendAll.setSuccess("NEW_USER")
-            return EventsController.fireAdmins(sessionId, sendAll)
+            {
+                let sendAll = new ListObjectsMessage("user", cleanUsers)
+                sendAll.setSuccess("NEW_USER")
+                return EventsController.fireAdmins(sessionId, sendAll)
+            }
 
+        case "product":
+            let product = received.getProduct()
+
+            if (!product.name || product.name == "") {
+                let send = new SetObjectMessage("product", {})
+                send.setFailure(`Falta el campo name`)
+                return EventsController.fireSelf(sessionId, send)
+            }else if (isNaN(Number(product.stock))) {
+                let send = new SetObjectMessage("product", {})
+                send.setFailure(`Falta el campo stock`)
+                return EventsController.fireSelf(sessionId, send)
+            }else if (isNaN(Number(product.price))) {
+                let send = new SetObjectMessage("product", {})
+                send.setFailure(`Falta el campo price`)
+                return EventsController.fireSelf(sessionId, send)
+            }
+
+            let foundedProduct = await Product.findByPk(product.id)
+
+            if (!foundedProduct) {
+                let newProduct = await Product.create({
+                    name: product.name,
+                    description: product.description ?? '',
+                    stock: product.stock,
+                    price: product.price
+                })
+
+                let cleanProduct = newProduct.toJSON()
+                let send = new SetObjectMessage("product", cleanProduct)
+                send.setSuccess("Producto creado")
+                EventsController.fireSelf(sessionId, send)
+            } else {
+                foundedProduct.name = product.name
+                foundedProduct.description = product.description
+                foundedProduct.stock = product.stock
+                foundedProduct.price = product.price
+
+                try {
+                    await foundedProduct.save()
+                } catch (error) {
+                    let send = new SetObjectMessage("product", {})
+                    send.setFailure(`Error al actualizar el producto`)
+                    return EventsController.fireSelf(sessionId, send)
+                }
+
+                let cleanProduct = foundedProduct.toJSON()
+                let send = new SetObjectMessage("product", cleanProduct)
+                send.setSuccess("Producto actualizado")
+                EventsController.fireSelf(sessionId, send)
+            }
+
+            let products = await Product.findAll()
+
+            let cleanProducts = products.map(product => {
+                let productObject = product.toJSON()
+                return productObject
+            })
+
+            {
+                let sendAll = new ListObjectsMessage("product", cleanProducts)
+                sendAll.setSuccess("NEW_PRODUCT")
+                return EventsController.fireAdmins(sessionId, sendAll)
+            }
+            
     }
 })
 
@@ -229,6 +325,34 @@ EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, 
 
                 let sendAll = new ListObjectsMessage("user", cleanUsers)
                 sendAll.setSuccess("NEW_USER")
+                return EventsController.fireAdmins(sessionId, sendAll)
+            }
+
+        case "product":
+            let product = received.getProduct()
+
+            if(product.id){
+                let foundedProduct = await Product.findByPk(product.id)
+                if(!foundedProduct){
+                    let send = new DeleteObjectMessage("product", {})
+                    send.setFailure(`El producto no existe`)
+                    return EventsController.fireSelf(sessionId, send)
+                }
+
+                await foundedProduct.destroy()
+
+                let send = new DeleteObjectMessage("product", {})
+                EventsController.fireSelf(sessionId, send)
+
+                let products = await Product.findAll()
+
+                let cleanProducts = products.map(product => {
+                    let productObject = product.toJSON()
+                    return productObject
+                })
+
+                let sendAll = new ListObjectsMessage("product", cleanProducts)
+                sendAll.setSuccess("NEW_PRODUCT")
                 return EventsController.fireAdmins(sessionId, sendAll)
             }
     }

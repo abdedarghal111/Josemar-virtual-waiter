@@ -7,7 +7,7 @@ export const serverWS = `wss://${window.location.host}`
 let socket = writable<null | WebSocket>(null)
 type messageCallbackType = (data: any, ws: WebSocket) => void
 let eventSubscriptions: Record<string, messageCallbackType> = {}
-let waitSubscriptions: Record<string, (() => void)[]> = {}
+let waitSubscriptions: Record<string, ((data:any) => any )[]> = {}
 
 export async function sendEvent(message: BaseMessage) {
     let socket = await getWebSocket()
@@ -21,8 +21,8 @@ let webSocket = new Promise<WebSocket>((res, reject) => {
 })
 
 export async function waitEvent(event: string) {
-    let resolve: () => void
-    let prom = new Promise<void>((res, reject) => {
+    let resolve: (data: any) => any
+    let prom = new Promise<any>((res, reject) => {
         resolve = res
     })
     if(!waitSubscriptions[event]){
@@ -31,6 +31,12 @@ export async function waitEvent(event: string) {
     waitSubscriptions[event].push(resolve)
 
     return prom
+}
+
+export async function sendMessage(message: string) {
+    let socket = await getWebSocket()
+    console.log(`toServer: ${message.toString()}`)
+    socket.send(message.toString())
 }
 
 export async function getWebSocket() : Promise<WebSocket> {
@@ -65,32 +71,42 @@ export function initConnection(){
         if (event.code >= 1000 && event.code <= 1003) {
             toast.success("Desconectado correctamente");
         } else {
-            toast.error(`Error de conexión (código ${event.code}): ${event.reason || 'Conexión rechazada'}`);
+            toast.success('Escucha cerrada')
+            console.error(`Error de conexión (código ${event.code}): ${event.reason || 'Conexión rechazada'}`);
         }
         socket.set(null);
     })
 
-    ws.addEventListener("message", (event) => {
-        console.log(`fromServer: ${event.data}`)
+    ws.addEventListener("message", (received) => {
+        console.log(`fromServer: ${received.data}`)
         try {
-            const data = JSON.parse(event.data)
+            const data = JSON.parse(received.data)
             const eventName = data?.event
+            let catched = false
+
+            if(!eventName){
+                console.error(`No existe ningún evento en la petición: ${received.data}`)
+            }
+
+            if(waitSubscriptions[eventName]){
+                catched = true
+                for(let resolve of waitSubscriptions[eventName]){
+                    resolve(data)
+                }
+                waitSubscriptions[eventName] = []
+            }
 
             if (eventName in eventSubscriptions) {
-                if(waitSubscriptions[eventName]){
-                    for(let resolve of waitSubscriptions[eventName]){
-                        resolve()
-                    }
-                    waitSubscriptions[eventName] = []
-                }
+                catched = true
                 eventSubscriptions[eventName](data, ws)
-            } else if (data) {
-                console.error(`No existe el evento ${eventName} en el cliente para los datos: ${data}`)
-            } else {
-                console.error(`Mensaje WebSocket sin datos o sin propiedad 'event': ${event.data}`)
+            } 
+            
+            if(!catched){
+                console.error(`No existe ninguna suscripción para el evento: ${eventName}`)
             }
+            
         } catch (error) {
-            console.error(`Error al parsear el mensaje WebSocket: ${event.data}`)
+            console.error(`Error al parsear el mensaje WebSocket: ${received.data}`)
         }
     })
 }

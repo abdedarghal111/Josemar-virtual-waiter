@@ -1,13 +1,13 @@
 <script lang="ts" module>
     import type { UserAttributes } from "_shared/SharedTypes.mjs";
-    import { ListUsersMessage } from "_shared/wsComunication/ListUsersMessage.mjs";
+    import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
     import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
 
     let users = $state<UserAttributes[]>([])
 
-    onSocketEvent(ListUsersMessage.event, (data, socket) => {
+    onSocketEvent(ListObjectsMessage.event, (data, socket) => {
         if(getCurrentView() !== 'admin.listUsers'){return}
-        let info = new ListUsersMessage(data)
+        let info = ListObjectsMessage.fromTable(data)
 
         users = info.getUsers()
     })
@@ -19,7 +19,7 @@
     import View from '../../components/View.svelte'
     import TittleHeader from '../../partials/TittleHeader.svelte';
     import Fa from "svelte-fa";
-    import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+    import { faArrowLeft, faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
     import { getCurrentView, setCurrentView } from "@src/lib/viewsCollector";
 
     users = []
@@ -27,14 +27,10 @@
     let waiting = 'placeholder animate-pulse';
 
     (async () => {
-        getWebSocket().then(ws => ws.send(new ListUsersMessage({ event: ListUsersMessage.event, success: true, users }).toString()))
-        await waitEvent(ListUsersMessage.event)
+        getWebSocket().then(ws => ws.send(new ListObjectsMessage('user', users).toString()))
+        await waitEvent(ListObjectsMessage.event)
         waiting = ''
     })()
-
-    $effect(() => {
-        console.log(users)
-    })
 
 </script>
 
@@ -85,9 +81,13 @@
 
     {#snippet footer()}
         <!-- flex centrado -->
-        <div class="flex flex-col items-center p-5">
+        <div class="flex items-center justify-center gap-5 p-5">
             <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.editDatabase')}>
                 <Fa icon={faArrowLeft} size="lg" /> Volver
+            </button>
+
+            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.user')}>
+                <Fa icon={faFileCirclePlus} size="lg" /> Crear nuevo
             </button>
         </div>
     {/snippet}

@@ -1,4 +1,4 @@
-import { anyObject, UserAttributes, validObjectType } from "../SharedTypes.mts";
+import { anyObject, ProductAttributes, UserAttributes, validObjectType } from "../SharedTypes.mts";
 import { BaseMessage, type baseContents } from "./BaseMessage.mts";
 
 export interface listObjectsContents extends baseContents {
@@ -13,14 +13,20 @@ export class ListObjectsMessage extends BaseMessage {
     protected type: validObjectType
     protected objects: anyObject[]
 
-    constructor(success: boolean, type: validObjectType, objects: anyObject[]) {
-        super(ListObjectsMessage.event, success)
+    constructor(type: validObjectType, objects: anyObject[]) {
+        super(ListObjectsMessage.event)
         this.type = type
         this.objects = objects
     }
 
     static fromTable(table: listObjectsContents): ListObjectsMessage {
-        return new ListObjectsMessage(table.success, table.type, table.objects)
+        let mess = new ListObjectsMessage(table.type, table.objects)
+        if(!table.success){
+            mess.setFailure(table.message)
+        }else{
+            mess.setSuccess(table.message)
+        }
+        return mess
     }
 
     toString(): string {
@@ -37,5 +43,9 @@ export class ListObjectsMessage extends BaseMessage {
 
     getUsers(): UserAttributes[] {
         return this.objects as UserAttributes[]
+    }
+
+    getProducts(): ProductAttributes[] {
+        return this.objects as ProductAttributes[]
     }
 }

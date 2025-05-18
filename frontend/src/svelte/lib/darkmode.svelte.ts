@@ -11,5 +11,5 @@ export function changeThemeEffect(){
 }
 
 export function changeTheme(){
-    darkTheme = !darkTheme
+    // darkTheme = !darkTheme
 }

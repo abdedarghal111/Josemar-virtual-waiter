@@ -5,7 +5,6 @@ import { EventsController } from "./EventsController.mts"
 import bcrypt from "bcrypt"
 import { LoginRequest, type ValidFields as LoginValidField } from "_shared/requests/LoginRequest.mjs"
 import { RegisterRequest, type ValidFields as RegisterValidField } from "_shared/requests/RegisterRequest.mjs"
-import { PrivateUser } from "_shared/SharedTypes.mjs"
 import { WhoAmIRequest } from "_shared/requests/WhoAmIRequest.mjs"
 import { LogoutRequest } from "_shared/requests/LogoutRequest.mjs"
 

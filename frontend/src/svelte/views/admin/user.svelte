@@ -1,9 +1,8 @@
 <script lang="ts" module>
-    import type { UserAttributes } from "_shared/SharedTypes.mjs";
-    import { GetObjectMessage } from "_shared/wsComunication/GetObjectMessage.mjs";
-    import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
+    import { SetObjectMessage, GetObjectMessage, DeleteObjectMessage } from "_shared/wsComunication/ObjectMessage.mjs";
 
     let user = $state({
+        id: -1,
         name: '',
         surname: '',
         username: '',
@@ -12,19 +11,31 @@
         password: ''
     })
 
-    onSocketEvent(GetObjectMessage.event, (data, socket) => {
-        if(getCurrentView() !== 'admin.user'){return}
-        let info = new GetObjectMessage(data)
+    const handleSubmit = async (event: SubmitEvent) => {
+        event.preventDefault();
+        
+        let msg = new SetObjectMessage("user", user)
+        await sendMessage(msg.toString())
 
-        user = {
-            name: info.getObject().name,
-            surname: info.getObject().surname,
-            username: info.getObject().username,
-            email: info.getObject().email,
-            permissionLevel: info.getObject().permissionLevel,
-            password: info.getObject().password
+        let resData = await waitEvent(SetObjectMessage.event)
+        let response = SetObjectMessage.fromTable(resData)
+
+        if(response.isOk()){
+            toast.success(response.getMessage())
+            let newUser = response.getUser()
+            user.id = newUser.id
+            user.name = newUser.name
+            user.surname = newUser.surname
+            user.username = newUser.username
+            user.email = newUser.email
+            user.permissionLevel = newUser.permissionLevel
+            user.password = ''
+        }else{
+            toast.error(response.getMessage())
         }
-    })
+    };
+
+
     const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
     const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
@@ -33,23 +44,29 @@
     import View from '../../components/View.svelte'
     import TittleHeader from '../../partials/TittleHeader.svelte';
     import Fa from "svelte-fa";
-    import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-    import { getCurrentView, getParameters, setCurrentView } from "@src/lib/viewsCollector";
+    import { faArrowLeft } from "@fortawesome/free-solid-svg-icons"
+    import { getParameters, setCurrentView } from "@src/lib/viewsCollector";
+    import toast from "svelte-french-toast";
+    import { sendMessage, waitEvent } from "@src/lib/wsComunication";
 
-    let id = getParameters().id
-    if(id){
-
-    }
 
     
+    let id = getParameters().id
+    if(id){
+        (async () => {
+            sendMessage(new GetObjectMessage('user', {id: id}).toString())
+            let result = await waitEvent(GetObjectMessage.event)
 
-    const handleSubmit = async (event: SubmitEvent) => {
-        event.preventDefault();
-        console.log(user);
-        
-        getWebSocket().then(ws => ws.send(new GetObjectMessage({ success: true, object: user }).toString()))
-    };
+            let response = GetObjectMessage.fromTable(result)
+            
+            if(!response.isOk()){
+                toast.error(response.getMessage())
+                return
+            }
 
+            user = response.getUser()
+        })()
+    }
 </script>
 
 <View>
@@ -67,30 +84,63 @@
             <div class="flex-1 p-5">
                 <!-- formulario para crear un usuario -->
                 
-                
-
                 <form onsubmit={handleSubmit}>
-                    <label for="name">Nombre:</label>
-                    <input type="text" id="name" bind:value={user.name} />
 
-                    <label for="surname">Apellido:</label>
-                    <input type="text" id="surname" bind:value={user.surname} />
+                    <label class="label">
+                        <span class="label-text text-lg">Nombre:</span>
+                        <input bind:value={user.name} id="user/name" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                    </label>
 
-                    <label for="username">Nombre de usuario:</label>
-                    <input type="text" id="username" bind:value={user.username} />
+                    <label class="label">
+                        <span class="label-text text-lg">Apellido:</span>
+                        <input bind:value={user.surname} id="user/surname" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                    </label>
 
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" bind:value={user.email} placeholder="Opcional" />
+                    <label class="label">
+                        <span class="label-text text-lg">Nombre de usuario:</span>
+                        <input bind:value={user.username} id="user/username" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                    </label>
 
-                    <label for="permissionLevel">Nivel de permiso:</label>
-                    <select id="permissionLevel" bind:value={user.permissionLevel}>
-                        <option value="">Seleccione un nivel de permiso</option>
-                        <option value="admin">Administrador</option>
-                        <option value="moderator">Moderador</option>
-                        <option value="user">Usuario</option>
-                    </select>
+                    <label class="label">
+                        <span class="label-text text-lg">Email:</span>
+                        <input bind:value={user.email} id="user/email" autocomplete="off" type="email" class="input input-bordered w-full" placeholder=" - " />
+                    </label>
 
-                    <button type="submit">Enviar</button>
+                    <label class="label mt-2">
+                        <span class="label-text text-lg">Nivel de permiso:</span>
+                        <select id="user/permissionLevel" bind:value={user.permissionLevel} autocomplete="off" class="input input-bordered w-full" placeholder=" - ">
+                            <option value="">Seleccione un nivel de permiso</option>
+                            <option value="admin">Administrador</option>
+                            <option value="worker">Moderador</option>
+                            <option value="user">Usuario</option>
+                        </select>
+                    </label>
+
+                    <label class="label mt-2">
+                        <span class="label-text text-lg">Contraseña:</span>
+                        <input bind:value={user.password} id="user/password" autocomplete="off" type="password" class="input input-bordered w-full" placeholder={user.id != -1 ? "( rellenar para cambiar )" : "Introduce tu contraseña"} />
+                    </label>
+
+                    <div class="flex items-center justify-center gap-5 mt-5">
+                        <input id="user/submit" class={"w-fit " + bClass} type="submit" value="Guardar"/>
+                        <button onclick={async (ev) => {
+                            ev.preventDefault()
+
+                            sendMessage(new DeleteObjectMessage('user', {id: user.id}).toString())
+                            let result = await waitEvent(DeleteObjectMessage.event)
+
+                            let response = DeleteObjectMessage.fromTable(result)
+                            
+                            if(!response.isOk()){
+                                toast.error(response.getMessage())
+                                return
+                            }else{
+                                toast.success(response.getMessage())
+                            }
+
+                            setCurrentView('admin.listUsers')
+                        }} class={"w-fit " + bClass}>Borrar</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -99,7 +149,7 @@
     {#snippet footer()}
         <!-- flex centrado -->
         <div class="flex flex-col items-center p-5">
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.editDatabase')}>
+            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.listUsers')}>
                 <Fa icon={faArrowLeft} size="lg" /> Volver
             </button>
         </div>

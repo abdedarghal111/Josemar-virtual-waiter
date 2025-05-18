@@ -137,7 +137,18 @@ export const Category = sequelize.define('Category', {
     timestamps: true
 });
 
-export const Product = sequelize.define('Product', {
+interface ProductAttributes extends Model {
+    id: number
+    name: string
+    categoryId: number
+    description: string
+    stock: number
+    price: number
+    createdAt?: Date
+    updatedAt?: Date
+}
+
+export const Product = sequelize.define<ProductAttributes, any>('Product', {
     id: {
         type: DataTypes.INTEGER.UNSIGNED,
         autoIncrement: true,

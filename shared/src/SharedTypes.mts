@@ -19,8 +19,19 @@ export interface UserAttributes {
   updatedAt?: Date
 }
 
+export interface ProductAttributes {
+    id: number
+    name: string
+    categoryId: number
+    description: string
+    stock: number
+    price: number
+    createdAt?: Date
+    updatedAt?: Date
+}
+
 export interface anyObject {
   [key: string]: any
 }
 
-export type validObjectType = 'null' | 'user' | 'order' | 'reservation'
+export type validObjectType = 'null' | 'user' | 'order' | 'reservation' | 'product'

@@ -5,7 +5,7 @@
     import Axios from 'axios';
     import { GetProductsRequest } from '_shared/requests/GetProductsRequest.mjs';
     import toast from 'svelte-french-toast';
-    import { ProductAttributes } from '_shared/SharedTypes.mjs';
+    import { type ProductAttributes } from '_shared/SharedTypes.mjs';
 
     let products = $state<ProductAttributes[]>([])
     let requested = $state<boolean>(false)

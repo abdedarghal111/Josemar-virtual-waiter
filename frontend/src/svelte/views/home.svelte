@@ -49,12 +49,12 @@
                     </button>
                 {/if}
 
-                <button class={"flex items-center gap-2 " + bClass} onclick={() => setCurrentView('user.menu')}>
+                <button class={"flex items-center gap-2 " + bClass} onclick={() => setCurrentView('user.products')}>
                     <Fa icon={faBurger} size="lg" /> Ver los productos
                 </button>
 
                 {#if $userdata.id}
-                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserve')}>
+                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserveMenu')}>
                         <Fa icon={faCalendarDays} size="lg" /> Realizar o ver reserva
                     </button>
 

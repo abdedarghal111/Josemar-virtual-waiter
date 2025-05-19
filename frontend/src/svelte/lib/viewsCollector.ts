@@ -5,11 +5,13 @@ import Home from '../views/home.svelte'
 import Pannel from '../views/workers/pannel.svelte'
 import Register from '../views/register.svelte'
 import Profile from '../views/profile.svelte'
-import InfoScreen from '../views/infoScreen.svelte'
+// import InfoScreen from '../views/infoScreen.svelte'
 import Login from '../views/login.svelte'
 import StartScreen from '../views/startScreen.svelte';
 
-import UserMenu from '../views/user/menu.svelte'
+import UserProducts from '../views/user/products.svelte'
+import UserReserveMenu from '../views/user/reserveMenu.svelte'
+import UserListReserves from '../views/user/listReserves.svelte'
 import UserReserve from '../views/user/reserve.svelte'
 
 import WorkerPannel from '../views/workers/pannel.svelte';
@@ -54,12 +56,14 @@ export const views = {
     pannel: Pannel,
     register: Register,
     profile: Profile,
-    infoScreen: InfoScreen,
+    // infoScreen: InfoScreen,
     login: Login,
     startScreen: StartScreen,
 
-    "user.menu": UserMenu,
+    "user.products": UserProducts,
+    "user.reserveMenu": UserReserveMenu,
     "user.reserve": UserReserve,
+    "user.listReserves": UserListReserves,
     
     "worker.pannel": WorkerPannel,
     "worker.waiterMode": WorkerWaiterMode,

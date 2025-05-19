@@ -69,7 +69,7 @@
     <div class={"flex flex-col items-center p-5 " + pClass}>
       <div class="h-full flex flex-col items-center gap-5">
 
-        <form on:submit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
+        <form onsubmit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
             <label class="label">
                 <span class="label-text text-lg">Nombre de usuario o email</span>
                 <input id="login/userOrEmail" autocomplete="username" type="text" class="input input-bordered w-full" placeholder="Introduce tu usuario o email" />

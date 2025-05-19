@@ -1,37 +1,30 @@
-<script lang="ts" module>
-    import type { UserAttributes } from "_shared/SharedTypes.mjs";
-    import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
-    import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
-
-    let users = $state<UserAttributes[]>([])
-
-    onSocketEvent(ListObjectsMessage.event, (data, socket) => {
-        if(getCurrentView() !== 'admin.listUsers'){return}
-        let info = ListObjectsMessage.fromTable(data)
-
-        users = info.getUsers()
-    })
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
-</script>
-
 <script lang="ts">
     import View from '../../components/View.svelte'
     import TittleHeader from '../../partials/TittleHeader.svelte';
     import Fa from "svelte-fa";
     import { faArrowLeft, faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
     import { getCurrentView, setCurrentView } from "@src/lib/viewsCollector";
+    
+    import type { UserAttributes } from "_shared/SharedTypes.mjs";
+    import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
+    import { onSocketEvent, sendMessage } from "@src/lib/wsComunication";
 
-    users = []
+    let users = $state<UserAttributes[]>([])
 
-    let waiting = 'placeholder animate-pulse';
+    onSocketEvent(ListObjectsMessage.event, (data) => {
+        if(getCurrentView() !== 'admin.listUsers'){return}
+        let info = ListObjectsMessage.fromTable(data)
 
-    (async () => {
-        getWebSocket().then(ws => ws.send(new ListObjectsMessage('user', users).toString()))
-        await waitEvent(ListObjectsMessage.event)
-        waiting = ''
+        users = info.getUsers()
+    })
+    
+    ;(async () => {
+        sendMessage(new ListObjectsMessage('user', users).toString())
+        // getWebSocket().then(ws => ws.send(new ListObjectsMessage('user', users).toString()))
+        // await waitEvent(ListObjectsMessage.event)
     })()
-
+    
+    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
@@ -51,11 +44,11 @@
                     <tbody class={"[&>tr]:hover:preset-tonal-primary min-h-full"}>
                         <tr>
                             <!-- <th>id</th> -->
-                            <th>name</th>
-                            <th>surname</th>
-                            <th>username</th>
-                            <th>email</th>
-                            <th>permissionLevel</th>
+                            <th>Nombre de usuario</th>
+                            <th>Nombre real</th>
+                            <th>Apellidos</th>
+                            <!-- <th>email</th> -->
+                            <!-- <th>permissionLevel</th> -->
                             <!-- <th>Created at</th>
                             <th>Updated at</th> -->
                         </tr>
@@ -67,8 +60,8 @@
                             <td>{user.name}</td>
                             <td>{user.surname}</td>
                             <td>{user.username}</td>
-                            <td>{user.email ?? '-'}</td>
-                            <td>{user.permissionLevel}</td>
+                            <!-- <td>{user.email ?? '-'}</td> -->
+                            <!-- <td>{user.permissionLevel}</td> -->
                             <!-- <td>{user.createdAt}</td>
                             <td>{user.updatedAt}</td> -->
                         </tr>

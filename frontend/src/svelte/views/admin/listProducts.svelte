@@ -1,28 +1,21 @@
-<script lang="ts" module>
-    import type { ProductAttributes } from "_shared/SharedTypes.mjs";
-    import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
-    import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
-
-    let products = $state<ProductAttributes[]>([])
-
-    onSocketEvent(ListObjectsMessage.event, (data, socket) => {
-        if(getCurrentView() !== 'admin.listProducts'){return}
-        let info = ListObjectsMessage.fromTable(data)
-
-        products = info.getProducts()
-    })
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
-</script>
-
 <script lang="ts">
     import View from '../../components/View.svelte'
     import TittleHeader from '../../partials/TittleHeader.svelte';
     import Fa from "svelte-fa";
     import { faArrowLeft, faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
     import { getCurrentView, setCurrentView } from "@src/lib/viewsCollector";
+    import type { ProductAttributes } from "_shared/SharedTypes.mjs";
+    import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
+    import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
 
-    products = []
+    let products = $state<ProductAttributes[]>([])
+
+    onSocketEvent(ListObjectsMessage.event, (data) => {
+        if(getCurrentView() !== 'admin.listProducts'){return}
+        let info = ListObjectsMessage.fromTable(data)
+
+        products = info.getProducts()
+    })
 
     let waiting = 'placeholder animate-pulse';
 
@@ -32,6 +25,7 @@
         waiting = ''
     })()
 
+    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
@@ -50,9 +44,9 @@
                 <table class="table caption-bottom">
                     <tbody class={"[&>tr]:hover:preset-tonal-primary min-h-full"}>
                         <tr>
-                            <th>name</th>
-                            <th>stock</th>
-                            <th>price</th>
+                            <th>Nombre</th>
+                            <th>Stock</th>
+                            <th>Precio</th>
                         </tr>
                     {#each products as product (product.id)}
                         <tr onclick={() => {

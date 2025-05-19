@@ -5,7 +5,7 @@ import { BaseMessage } from "_shared/wsComunication/BaseMessage.mts";
 export const serverWS = `wss://${window.location.host}`
 
 let socket = writable<null | WebSocket>(null)
-type messageCallbackType = (data: any, ws: WebSocket) => void
+type messageCallbackType = (data: any) => void
 let eventSubscriptions: Record<string, messageCallbackType> = {}
 let waitSubscriptions: Record<string, ((data:any) => any )[]> = {}
 
@@ -98,7 +98,7 @@ export function initConnection(){
 
             if (eventName in eventSubscriptions) {
                 catched = true
-                eventSubscriptions[eventName](data, ws)
+                eventSubscriptions[eventName](data)
             } 
             
             if(!catched){

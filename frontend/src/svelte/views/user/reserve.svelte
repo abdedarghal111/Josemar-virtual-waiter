@@ -1,7 +1,7 @@
 <script lang='ts'>
-    import ClientFooter from '../partials/ClientFooter.svelte'
-    import View from '../components/View.svelte'
-    import TittleHeader from '../partials/TittleHeader.svelte';
+    import ClientFooter from '@src/partials/ClientFooter.svelte'
+    import View from '@src/components/View.svelte'
+    import TittleHeader from '@src/partials/TittleHeader.svelte';
 </script>
 
 <View>

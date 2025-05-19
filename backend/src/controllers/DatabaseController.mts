@@ -73,7 +73,19 @@ const Order = sequelize.define('Order', {
     timestamps: true
 });
 
-export const Reservation = sequelize.define('Reservation', {
+interface ReservationAttributes extends Model {
+  id: number
+  requestedBy: number
+  orderId: number
+  requestDate: Date
+  status: 'requested' | 'accepted' | 'rejected'
+  numAdults: number
+  numMinors: number
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export const Reservation = sequelize.define<ReservationAttributes, any>('Reservation', {
     id: {
         type: DataTypes.INTEGER.UNSIGNED,
         autoIncrement: true,

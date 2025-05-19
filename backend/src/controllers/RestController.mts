@@ -1,5 +1,5 @@
 import { Op } from "sequelize"
-import { User } from "./DatabaseController.mts"
+import { Product, User } from "./DatabaseController.mts"
 import { HttpController } from "./HttpController.mts"
 import { EventsController } from "./EventsController.mts"
 import bcrypt from "bcrypt"
@@ -7,6 +7,8 @@ import { LoginRequest, type ValidFields as LoginValidField } from "_shared/reque
 import { RegisterRequest, type ValidFields as RegisterValidField } from "_shared/requests/RegisterRequest.mjs"
 import { WhoAmIRequest } from "_shared/requests/WhoAmIRequest.mjs"
 import { LogoutRequest } from "_shared/requests/LogoutRequest.mjs"
+import { GetProductsRequest } from "_shared/requests/GetProductsRequest.mjs"
+import { ProductAttributes } from "_shared/SharedTypes.mjs"
 
 const app = HttpController.express
 const API = '/api/'
@@ -180,6 +182,24 @@ app.post(API + LogoutRequest.path, (req, res) => {
         let request = new LogoutRequest(false, "No estas registrado")
         res.send(request.toJson())
     }
+})
+
+app.post(API + GetProductsRequest.path, async (req, res) => {
+    let products = await Product.findAll()
+
+    let cleanProducts = products.map(product => {
+        return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price
+        }
+    })
+
+    res.header('Content-Type', 'application/json')
+    
+    let request = new GetProductsRequest(true, "", cleanProducts as ProductAttributes[])
+    res.send(request.toJson())
 })
 
 export class RestController {

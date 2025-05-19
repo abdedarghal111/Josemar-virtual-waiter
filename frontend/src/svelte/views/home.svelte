@@ -49,14 +49,20 @@
                     </button>
                 {/if}
 
-                <button class={"flex items-center gap-2 " + bClass} onclick={() => setCurrentView('menu')}>
-                    <Fa icon={faBurger} size="lg" /> Ver la carta
+                <button class={"flex items-center gap-2 " + bClass} onclick={() => setCurrentView('user.menu')}>
+                    <Fa icon={faBurger} size="lg" /> Ver los productos
                 </button>
 
                 {#if $userdata.id}
-                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => initConnection()}><!-- setCurrentView('reserve')}> -->
+                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserve')}>
                         <Fa icon={faCalendarDays} size="lg" /> Realizar o ver reserva
                     </button>
+
+                    {#if $userdata.permissionLevel !== 'user'}
+                        <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.pannel')}>
+                            <Fa icon={faBriefcase} size="lg" /> Panel de empleados
+                        </button>
+                    {/if}
 
                     <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={
                     () => {
@@ -75,12 +81,6 @@
                     }>
                         <Fa icon={faDoorOpen} size="lg" /> Cerrar sesión
                     </button>
-
-                    {#if $userdata.permissionLevel !== 'user'}
-                        <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.pannel')}>
-                            <Fa icon={faBriefcase} size="lg" /> Panel de empleados
-                        </button>
-                    {/if}
                 {/if}
             </div>
         </div>

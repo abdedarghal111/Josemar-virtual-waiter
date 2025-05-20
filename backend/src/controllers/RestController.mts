@@ -1,6 +1,6 @@
 import { Op } from "sequelize"
-import { Product, User } from "./DatabaseController.mts"
-import { HttpController } from "./HttpController.mts"
+import { Product, Reservation, User } from "./DatabaseController.mts"
+import { HttpController, UserSessionDataType } from "./HttpController.mts"
 import { EventsController } from "./EventsController.mts"
 import bcrypt from "bcrypt"
 import { LoginRequest, type ValidFields as LoginValidField } from "_shared/requests/LoginRequest.mjs"
@@ -8,18 +8,22 @@ import { RegisterRequest, type ValidFields as RegisterValidField } from "_shared
 import { WhoAmIRequest } from "_shared/requests/WhoAmIRequest.mjs"
 import { LogoutRequest } from "_shared/requests/LogoutRequest.mjs"
 import { GetProductsRequest } from "_shared/requests/GetProductsRequest.mjs"
-import { ProductAttributes } from "_shared/SharedTypes.mjs"
+import { GetReservationRequest } from "_shared/requests/GetReservationRequest.mjs"
+import { SetReservationRequest } from "_shared/requests/SetReservationRequest.mjs"
+import { ListMyReservesRequest } from "_shared/requests/ListMyReservesRequest.mjs"
+import { DeleteReservationRequest } from "_shared/requests/DeleteReservationRequest.mjs"
+import { ProductAttributes, ReservationAttributes } from "_shared/SharedTypes.mjs"
 
 const app = HttpController.express
 const API = '/api/'
 
 app.post(API + WhoAmIRequest.path, async (req, res) => {
-    let userData = req.session.userData
     res.header('Content-Type', 'application/json')
     let request: WhoAmIRequest
 
-    if(userData && userData.userId){
-        let user = await User.findByPk(userData.userId)
+    let user = await getRequestUser(req.session.userData)
+
+    if(user){
         request = new WhoAmIRequest(true, "Estas registrado", true, {
             id: user.id,
             name: user.name,
@@ -35,11 +39,11 @@ app.post(API + WhoAmIRequest.path, async (req, res) => {
 })
 
 app.post(API + RegisterRequest.path, async (req, res) => {
-    let userData = req.session.userData
     res.header('Content-Type', 'application/json')
     let request: RegisterRequest
+    let user = await getRequestUser(req.session.userData)
 
-    if(userData && userData.userId){
+    if(user){
         res.send(JSON.stringify({
             success: false,
             message: "Ya estás registrado"
@@ -116,11 +120,11 @@ app.post(API + RegisterRequest.path, async (req, res) => {
 })
 
 app.post(API + LoginRequest.path, async (req, res) => {
-    let userData = req.session.userData
     res.header('Content-Type', 'application/json')
     let request: LoginRequest
+    let user = await getRequestUser(req.session.userData)
 
-    if(userData && userData.userId){
+    if(user){
         request = new LoginRequest(false, "Ya estás registrado")
     } else {
 
@@ -167,13 +171,13 @@ app.post(API + LoginRequest.path, async (req, res) => {
     res.send(request.toJson())
 })
 
-app.post(API + LogoutRequest.path, (req, res) => {
-    let userData = req.session.userData
+app.post(API + LogoutRequest.path, async (req, res) => {
     res.header('Content-Type', 'application/json')
     
-    if(userData && userData.userId){
-        EventsController.removeConnection(userData.userId)
-        userData.userId = null
+    let user = await getRequestUser(req.session.userData)
+    if(user){
+        EventsController.removeConnection(req.sessionID)
+        req.session.userData = null
         req.session.destroy(() => {
             let request = new LogoutRequest(true, "Éxito al cerrar sesion")
             res.send(request.toJson())
@@ -201,6 +205,244 @@ app.post(API + GetProductsRequest.path, async (req, res) => {
     let request = new GetProductsRequest(true, "", cleanProducts as ProductAttributes[])
     res.send(request.toJson())
 })
+
+app.post(API + GetReservationRequest.path, async (req, res) => {
+    
+    let user = await getRequestUser(req.session.userData)
+    
+    res.header('Content-Type', 'application/json')
+
+    if(!user){
+        let request = new GetReservationRequest(false, "No estas registrado", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    let inData = req.body
+
+    if(!inData.id){
+        let request = new GetReservationRequest(false, "Falta el campo productId", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    let reservation = await Reservation.findByPk(inData.id)
+
+    if(!reservation){
+        let request = new GetReservationRequest(false, "Reserva no encontrada", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    if(reservation.requestedBy != user.id){
+        let request = new GetReservationRequest(false, "Reserva no encontrada", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    let cleanReservation = {
+        id: reservation.id,
+        requestDate: reservation.requestDate,
+        status: reservation.status,
+        numAdults: reservation.numAdults,
+        numMinors: reservation.numMinors
+    }
+
+    let request = new GetReservationRequest(true, "", cleanReservation as ReservationAttributes)
+    res.send(request.toJson())
+})
+
+app.post(API + SetReservationRequest.path, async (req, res) => {
+    
+    let user = await getRequestUser(req.session.userData)
+    
+    res.header('Content-Type', 'application/json')
+
+    if(!user){
+        let request = new GetReservationRequest(false, "No estas registrado", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    let inData = req.body
+    let requiredFields = ["requestDate"]
+
+    for(let field of requiredFields){
+        if(!inData[field]){
+            let request = new SetReservationRequest(false, `Falta el campo ${field}`, {} as ReservationAttributes)
+            res.send(request.toJson())
+            return
+        }
+    }
+
+    let requestDate = new Date(inData.requestDate)
+    let adults = inData.numAdults ?? 0
+    let minors = inData.numMinors ?? 0
+    let totalPeople = adults + minors
+
+    if(requestDate.getTime() < Date.now()){
+        let request = new SetReservationRequest(false, "La fecha de la reserva debe ser posterior a la actual", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    if(totalPeople < 1){
+        let request = new SetReservationRequest(false, "La reserva debe tener al menos 1 persona", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    if(inData.id){
+        let reservation = await Reservation.findByPk(inData.id)
+
+        if(reservation && reservation.requestedBy == user.id){
+
+            if(reservation.status != 'requested'){
+                let request = new SetReservationRequest(false, "Reserva revisada, no se puede editar", {} as ReservationAttributes)
+                res.send(request.toJson())
+                return
+            }
+
+            reservation = await reservation.update({
+                requestDate: requestDate,
+                numAdults: adults,
+                numMinors: minors
+            })
+
+            let cleanReservation = {
+                id: reservation.id,
+                requestDate: reservation.requestDate,
+                status: reservation.status,
+                numAdults: reservation.numAdults,
+                numMinors: reservation.numMinors
+            }
+
+            let request = new SetReservationRequest(true, "", cleanReservation as ReservationAttributes)
+            res.send(request.toJson())
+            return
+        }
+    }
+
+    let newReservation = await Reservation.create({
+        requestedBy: user.id,
+        requestDate: requestDate,
+        status: 'requested',
+        numAdults: adults,
+        numMinors: minors
+    })
+
+    let request = new SetReservationRequest(true, "", {
+        id: newReservation.id,
+        requestedBy: newReservation.requestedBy,
+        requestDate: newReservation.requestDate,
+        status: newReservation.status,
+        numAdults: newReservation.numAdults,
+        numMinors: newReservation.numMinors
+    } as ReservationAttributes)
+    res.send(request.toJson())
+})
+
+app.post(API + ListMyReservesRequest.path, async (req, res) => {
+    
+    let user = await getRequestUser(req.session.userData)
+    
+    res.header('Content-Type', 'application/json')
+
+    if(!user){
+        let request = new GetReservationRequest(false, "No estas registrado", {} as ReservationAttributes)
+        res.send(request.toJson())
+        return
+    }
+
+    let reservations = await Reservation.findAll({
+        where: {
+            requestedBy: user.id
+        }
+    })
+
+    let cleanReservations = reservations.map(reservation => {
+        let reservationObject = {
+            id: reservation.id,
+            requestDate: reservation.requestDate,
+            status: reservation.status,
+            numAdults: reservation.numAdults,
+            numMinors: reservation.numMinors
+        }
+        return reservationObject
+    })
+
+    let request = new ListMyReservesRequest(true, "", cleanReservations as ReservationAttributes[])
+    res.send(request.toJson())
+})
+
+app.post(API + DeleteReservationRequest.path, async (req, res) => {
+    
+    let userData = req.session.userData
+    
+    res.header('Content-Type', 'application/json')
+
+    if(!userData || !userData.userId){
+        let request = new DeleteReservationRequest(false, "No estas registrado")
+        res.send(request.toJson())
+        return
+    }
+
+    let user = await User.findByPk(userData.userId)
+
+    if(!user){
+        let request = new DeleteReservationRequest(false, "No estas registrado")
+        res.send(request.toJson())
+        return
+    }
+
+    let inData = req.body
+
+    if(!inData.id){
+        let request = new DeleteReservationRequest(false, "Falta el id de la reserva")
+        res.send(request.toJson())
+        return
+    }
+
+    let reservation = await Reservation.findByPk(inData.id)
+
+    if(!reservation){
+        let request = new DeleteReservationRequest(false, "Reserva no encontrada")
+        res.send(request.toJson())
+        return
+    }
+
+    if(reservation.requestedBy != user.id){
+        let request = new DeleteReservationRequest(false, "Reserva no encontrada")
+        res.send(request.toJson())
+        return
+    }
+
+    if(reservation.status != 'requested'){
+        let request = new DeleteReservationRequest(false, "No se puede borrar la reserva porque ya ha sido revisada.")
+        res.send(request.toJson())
+        return
+    }
+
+    await reservation.destroy()
+
+    let request = new DeleteReservationRequest(true, `Reserva #${inData.id} borrada correctamente`)
+    res.send(request.toJson())
+})
+
+async function getRequestUser(userData: UserSessionDataType){
+    if(!userData || !userData.userId){
+        return
+    }
+
+    let user = await User.findByPk(userData.userId)
+
+    if(!user){
+        return
+    }
+
+    return user
+}
+
 
 export class RestController {
     static app = app

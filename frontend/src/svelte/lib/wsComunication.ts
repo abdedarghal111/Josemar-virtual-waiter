@@ -60,7 +60,8 @@ export function initConnection(){
 
     ws.addEventListener("open", () => {
         resolve(ws)
-        toast.success("Conectado correctamente")
+        // toast.success("Conectado correctamente")
+        console.log("Conectado correctamente")
     });
 
     // ws.addEventListener("error", () => {

@@ -61,7 +61,7 @@
                 <div class="grid gap-4">
                     {#if reservations.length > 0 && requested}
                         {#each reservations as reservation}
-                        <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5">
+                        <button class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5" onclick={() => setCurrentView('user.reserve', {id: reservation.id})}>
                             <article class="p-2">
                                 <h2 class="h6 font-bold">Reserva #{reservation.id}</h2>
                                 <p class="text-sm">Fecha: {new Date(reservation.requestDate).toLocaleDateString()} {new Date(reservation.requestDate).toLocaleTimeString()}</p>
@@ -69,10 +69,12 @@
                                 <p class="text-sm">Niños: {reservation.numMinors}</p>
                                 <p class="text-sm font-bold mt-2">Estado: {reservationStatus[reservation.status]}</p>
                             </article>
-                            <footer class="flex justify-end p-2">
-                                <button class="btn btn-primary btn-xs">Ver detalles</button>
-                            </footer>
-                        </div>
+                            {#if reservation.status === 'requested'}
+                                <footer class="flex justify-end">
+                                    <div class="btn btn-primary btn-xs">Modificar</div>
+                                </footer>
+                            {/if}
+                        </button>
                         {/each}
                     {:else if requested && reservations.length === 0}
                         <p class="h3 text-center">No se ha realizado ninguna reserva.</p>

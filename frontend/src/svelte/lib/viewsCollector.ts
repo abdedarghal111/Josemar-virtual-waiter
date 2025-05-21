@@ -1,29 +1,31 @@
 import { writable, get } from 'svelte/store';
 import { storable } from './storable';
 
-import Home from '../views/home.svelte'
-import Pannel from '../views/workers/pannel.svelte'
-import Register from '../views/register.svelte'
-import Profile from '../views/profile.svelte'
-// import InfoScreen from '../views/infoScreen.svelte'
-import Login from '../views/login.svelte'
-import StartScreen from '../views/startScreen.svelte';
+import Home from '@src/views/home.svelte'
+import Pannel from '@src/views/workers/pannel.svelte'
+import Register from '@src/views/register.svelte'
+import Profile from '@src/views/profile.svelte'
+// import InfoScreen from '@src/views/infoScreen.svelte'
+import Login from '@src/views/login.svelte'
+import StartScreen from '@src/views/startScreen.svelte';
 
-import UserProducts from '../views/user/products.svelte'
-import UserReserveMenu from '../views/user/reserveMenu.svelte'
-import UserListReserves from '../views/user/listReserves.svelte'
-import UserReserve from '../views/user/reserve.svelte'
+import UserProducts from '@src/views/user/products.svelte'
+import UserReserveMenu from '@src/views/user/reserveMenu.svelte'
+import UserListReserves from '@src/views/user/listReserves.svelte'
+import UserReserve from '@src/views/user/reserve.svelte'
 
-import WorkerPannel from '../views/workers/pannel.svelte';
-import WorkerWaiterMode from '../views/workers/waiterMode.svelte';
-import WorkerCheckReserves from '../views/workers/checkReserves.svelte';
-import WorkerCheffMode from '../views/workers/cheffMode.svelte';
+import WorkerPannel from '@src/views/workers/pannel.svelte';
+import WorkerWaiterMode from '@src/views/workers/waiterMode.svelte';
+import WorkerAcceptReserves from '@src/views/workers/acceptReserves.svelte';
+import WorkerCheffMode from '@src/views/workers/cheffMode.svelte';
 
-import AdminEditDatabase from '../views/admin/editDatabase.svelte';
-import AdminListUsers from '../views/admin/listUsers.svelte';
-import AdminUser from '../views/admin/user.svelte';
-import AdminListProducts from '../views/admin/listProducts.svelte';
-import AdminProduct from '../views/admin/product.svelte';
+import AdminEditDatabase from '@src/views/admin/editDatabase.svelte';
+import AdminListUsers from '@src/views/admin/listUsers.svelte';
+import AdminUser from '@src/views/admin/user.svelte';
+import AdminListProducts from '@src/views/admin/listProducts.svelte';
+import AdminProduct from '@src/views/admin/product.svelte';
+import AdminListReservations from '@src/views/admin/listReservations.svelte';
+// import AdminReservation from '@src/views/admin/reservation.svelte';
 
 export let currentView = storable<string>('currentView', 'home')
 export let parameters = storable<{ [key: string]: any }>('parameters', {})
@@ -67,12 +69,14 @@ export const views = {
     
     "worker.pannel": WorkerPannel,
     "worker.waiterMode": WorkerWaiterMode,
-    "worker.checkReserves": WorkerCheckReserves,
+    "worker.acceptReserves": WorkerAcceptReserves,
     "worker.cheffMode": WorkerCheffMode,
 
     "admin.editDatabase": AdminEditDatabase,
     "admin.listUsers": AdminListUsers,
     "admin.user": AdminUser,
     "admin.listProducts": AdminListProducts,
-    "admin.product": AdminProduct
+    "admin.product": AdminProduct,
+    "admin.listReservations": AdminListReservations,
+    // "admin.reservation": AdminReservation
 }

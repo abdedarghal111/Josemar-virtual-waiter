@@ -1,4 +1,4 @@
-import { anyObject, ProductAttributes, UserAttributes, validObjectType } from "../SharedTypes.mts";
+import { anyObject, ProductAttributes, UserAttributes, validObjectType, ReservationAttributes } from "../SharedTypes.mts";
 import { BaseMessage, type baseContents } from "./BaseMessage.mts";
 
 export interface listObjectsContents extends baseContents {
@@ -47,5 +47,9 @@ export class ListObjectsMessage extends BaseMessage {
 
     getProducts(): ProductAttributes[] {
         return this.objects as ProductAttributes[]
+    }
+
+    getReservations(): ReservationAttributes[] {
+        return this.objects as ReservationAttributes[]
     }
 }

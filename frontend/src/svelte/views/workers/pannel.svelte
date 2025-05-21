@@ -44,7 +44,7 @@
                     <Fa icon={faReceipt} size="lg" /> Modo camarero
                 </button>
 
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.checkReserves')}>
+                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.acceptReserves')}>
                     <Fa icon={faCalendarDays} size="lg" /> Aceptar reservas
                 </button>
 

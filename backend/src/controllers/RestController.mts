@@ -1,7 +1,7 @@
 import { Op } from "sequelize"
 import { Product, Reservation, User } from "./DatabaseController.mts"
 import { HttpController, UserSessionDataType } from "./HttpController.mts"
-import { EventsController } from "./EventsController.mts"
+import { EventsController, getPreparedListReservations } from "./EventsController.mts"
 import bcrypt from "bcrypt"
 import { LoginRequest, type ValidFields as LoginValidField } from "_shared/requests/LoginRequest.mjs"
 import { RegisterRequest, type ValidFields as RegisterValidField } from "_shared/requests/RegisterRequest.mjs"
@@ -13,6 +13,7 @@ import { SetReservationRequest } from "_shared/requests/SetReservationRequest.mj
 import { ListMyReservesRequest } from "_shared/requests/ListMyReservesRequest.mjs"
 import { DeleteReservationRequest } from "_shared/requests/DeleteReservationRequest.mjs"
 import { ProductAttributes, ReservationAttributes } from "_shared/SharedTypes.mjs"
+import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs"
 
 const app = HttpController.express
 const API = '/api/'
@@ -319,6 +320,9 @@ app.post(API + SetReservationRequest.path, async (req, res) => {
 
             let request = new SetReservationRequest(true, "", cleanReservation as ReservationAttributes)
             res.send(request.toJson())
+            let preparedListReservations = await getPreparedListReservations()
+            EventsController.fireAdmins(preparedListReservations.event, preparedListReservations)
+            EventsController.pushNotification('edited', `${user.name} ha editado la reserva ${inData.id}`, true)
             return
         }
     }
@@ -340,6 +344,10 @@ app.post(API + SetReservationRequest.path, async (req, res) => {
         numMinors: newReservation.numMinors
     } as ReservationAttributes)
     res.send(request.toJson())
+
+    let preparedListReservations = await getPreparedListReservations()
+    EventsController.fireAdmins(preparedListReservations.event, preparedListReservations)
+    EventsController.pushNotification('info', `${user.name} ha solicitado una reserva`, true)
 })
 
 app.post(API + ListMyReservesRequest.path, async (req, res) => {
@@ -423,7 +431,11 @@ app.post(API + DeleteReservationRequest.path, async (req, res) => {
         return
     }
 
+    EventsController.pushNotification('warning', `${user.name} ha eliminado su solicitud de reserva.`, true)
     await reservation.destroy()
+
+    let preparedListReservations = await getPreparedListReservations()
+    EventsController.fireAdmins(preparedListReservations.event, preparedListReservations)
 
     let request = new DeleteReservationRequest(true, `Reserva #${inData.id} borrada correctamente`)
     res.send(request.toJson())

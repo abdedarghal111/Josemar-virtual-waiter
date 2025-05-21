@@ -40,6 +40,10 @@
                     <Fa icon={faBurger} size="lg" /> Productos
                 </button>
 
+                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.listReservations')}>
+                    <Fa icon={faCalendarDays} size="lg" /> Reservas
+                </button>
+
                 <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.pannel')}>
                     <Fa icon={faArrowLeft} size="lg" /> Vovler
                 </button>

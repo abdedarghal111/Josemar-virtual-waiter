@@ -44,6 +44,16 @@
     })()
 
     const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
+
+    const setBackgroudReservationStatus = (status: string) => {
+        if(status === 'requested'){
+            return 'bg-surface-300 dark:bg-surface-900'
+        }else if(status === 'accepted'){
+            return 'bg-green-200 dark:bg-green-900'
+        }else{
+            return 'bg-red-200 dark:bg-red-900'
+        }
+    }
 </script>
 
 <View>
@@ -61,7 +71,7 @@
                 <div class="grid gap-4">
                     {#if reservations.length > 0 && requested}
                         {#each reservations as reservation}
-                        <button class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5" onclick={() => setCurrentView('user.reserve', {id: reservation.id})}>
+                        <button class={setBackgroudReservationStatus(reservation.status) + ` card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5`} onclick={() => setCurrentView('user.reserve', {id: reservation.id})}>
                             <article class="p-2">
                                 <h2 class="h6 font-bold">Reserva #{reservation.id}</h2>
                                 <p class="text-sm">Fecha: {new Date(reservation.requestDate).toLocaleDateString()} {new Date(reservation.requestDate).toLocaleTimeString()}</p>
@@ -84,7 +94,7 @@
                 </div>
             </div>
 
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserveMenu')}>
+            <button class={"flex items-center gap-2 mt-5 mb-5 " + bClass} onclick={() => setCurrentView('user.reserveMenu')}>
                 <Fa icon={faArrowLeft} size="lg" /> Volver
             </button>
         </div>

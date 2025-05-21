@@ -1,8 +1,10 @@
-import WebSocket from "ws"
 import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs"
 import { GetObjectMessage, SetObjectMessage, DeleteObjectMessage } from "_shared/wsComunication/ObjectMessage.mjs"
-import { Product, User } from "./DatabaseController.mts"
 import { BaseMessage } from "_shared/wsComunication/BaseMessage.mjs"
+import { AcceptReserveMessage } from "_shared/wsComunication/AcceptReserveMessage.mjs"
+import { PushNotificationMessage, pushNotificationType } from "_shared/wsComunication/PushNotificationMessage.mjs"
+import WebSocket from "ws"
+import { Product, Reservation, User } from "./DatabaseController.mts"
 import bcrypt from "bcrypt"
 
 // static class
@@ -55,18 +57,51 @@ export class EventsController {
         this.workerConnections[sessionId].send(message.toString())
     }
 
+    public static pushNotification(type: pushNotificationType, message: string, soloAdmins: boolean = false) {
+        let send = new PushNotificationMessage(type)
+        send.setSuccess(message)
+        
+        if(soloAdmins) {
+            EventsController.fireAdmins(PushNotificationMessage.event, send)
+        } else {
+            EventsController.fireWorkers(PushNotificationMessage.event, send)
+        }
+    }
+
     public static subscribe(event: string, callback: (sessionId: string, isAdmin: boolean, data: any) => void, soloAdmins: boolean = false) {
         this.events[event] = callback
     }
 }
 
-EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
-    if(!isAdmin) {return}
+export async function getPreparedListReservations(): Promise<ListObjectsMessage> {
+    let reservations = await Reservation.findAll()
+        
+    let cleanReservations = []
+    for(let reservation of reservations) {
+        let user = await User.findByPk(reservation.requestedBy)
+        cleanReservations.push({
+            id: reservation.id,
+            requestedBy: user ? user.username : '',
+            requestDate: reservation.requestDate,
+            status: reservation.status,
+            numAdults: reservation.numAdults,
+            numMinors: reservation.numMinors
+        })
+    }
 
+    {
+        let send = new ListObjectsMessage("reservation", cleanReservations)
+    
+        return send
+    }
+}
+
+EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
     let received = ListObjectsMessage.fromTable(data)
 
     switch (received.getType()) {
         case "user":
+            if(!isAdmin) {return}
             let users = await User.findAll()
 
             let cleanUsers = users.map(user => {
@@ -81,6 +116,7 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
                 return EventsController.fireSelf(sessionId, send)
             }
         case "product":
+            if(!isAdmin) {return}
             let products = await Product.findAll()
 
             let cleanProducts = products.map(product => {
@@ -90,6 +126,28 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
 
             {
                 let send = new ListObjectsMessage("product", cleanProducts)
+            
+                return EventsController.fireSelf(sessionId, send)
+            }
+
+        case "reservation":
+            let reservations = await Reservation.findAll()
+
+            let cleanReservations = []
+            for(let reservation of reservations) {
+                let user = await User.findByPk(reservation.requestedBy)
+                cleanReservations.push({
+                    id: reservation.id,
+                    requestedBy: user ? user.name : '',
+                    requestDate: reservation.requestDate,
+                    status: reservation.status,
+                    numAdults: reservation.numAdults,
+                    numMinors: reservation.numMinors
+                })
+            }
+
+            {
+                let send = new ListObjectsMessage("reservation", cleanReservations)
             
                 return EventsController.fireSelf(sessionId, send)
             }
@@ -287,7 +345,7 @@ EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isA
             {
                 let sendAll = new ListObjectsMessage("product", cleanProducts)
                 sendAll.setSuccess("NEW_PRODUCT")
-                return EventsController.fireAdmins(sessionId, sendAll)
+                return EventsController.fireWorkers(sessionId, sendAll)
             }
             
     }
@@ -356,4 +414,34 @@ EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, 
                 return EventsController.fireAdmins(sessionId, sendAll)
             }
     }
+})
+
+EventsController.subscribe(AcceptReserveMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
+
+    let received = AcceptReserveMessage.fromTable(data)
+
+    let reservation = await Reservation.findByPk(received.getId())
+
+    if(!reservation){
+        let send = new AcceptReserveMessage(received.getId(), received.isAccepted())
+        send.setFailure(`La reserva no existe`)
+        return EventsController.fireSelf(sessionId, send)
+    }
+
+    if(reservation.status !== 'requested'){
+        let send = new AcceptReserveMessage(received.getId(), received.isAccepted())
+        send.setFailure(`La reserva ya fue revisada`)
+        return EventsController.fireSelf(sessionId, send)
+    }
+
+    reservation.status = received.isAccepted() ? 'accepted' : 'rejected'
+    await reservation.save()
+
+    let send = new AcceptReserveMessage(received.getId(), received.isAccepted())
+    send.setSuccess(`Reserva ${received.isAccepted() ? 'aceptada' : 'rechazada'} correctamente!`)
+    EventsController.fireSelf(sessionId, send)
+
+    let listReservationsEvent = await getPreparedListReservations()
+
+    EventsController.fireWorkers(listReservationsEvent.event, listReservationsEvent)
 })

@@ -18,6 +18,7 @@ import WorkerPannel from '@src/views/workers/pannel.svelte';
 import WorkerWaiterMode from '@src/views/workers/waiterMode.svelte';
 import WorkerAcceptReserves from '@src/views/workers/acceptReserves.svelte';
 import WorkerCheffMode from '@src/views/workers/cheffMode.svelte';
+import WorkerViewNotes from '@src/views/workers/viewNotes.svelte';
 
 import AdminEditDatabase from '@src/views/admin/editDatabase.svelte';
 import AdminListUsers from '@src/views/admin/listUsers.svelte';
@@ -71,6 +72,7 @@ export const views = {
     "worker.waiterMode": WorkerWaiterMode,
     "worker.acceptReserves": WorkerAcceptReserves,
     "worker.cheffMode": WorkerCheffMode,
+    "worker.viewNotes": WorkerViewNotes,
 
     "admin.editDatabase": AdminEditDatabase,
     "admin.listUsers": AdminListUsers,

@@ -1,5 +1,6 @@
 <script lang='ts'>
   import '@src/lib/sound'
+  import { Modals } from 'svelte-modals'
   import { changeTheme, changeThemeEffect } from './lib/darkmode.svelte';
   import { checkSesion, userdata } from './lib/userdata.svelte';
   import { views, currentView } from './lib/viewsCollector';
@@ -50,3 +51,14 @@
       }
     }
 }></svelte:body>
+
+<Modals>
+  <!-- shown when any modal is opened -->
+  {#snippet backdrop({ close })}
+    <!-- svelte-ignore element_invalid_self_closing_tag, a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+    <div
+      class="fixed top-0 bottom-0 right-0 left-0 bg-[rgba(0,0,0,0.20)]"
+      onclick={() => close()}
+    />
+  {/snippet}
+</Modals>

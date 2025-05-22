@@ -1,7 +1,8 @@
 <script lang='ts'>
-    import ClientFooter from '../../partials/ClientFooter.svelte'
-    import View from '../../components/View.svelte'
-    import TittleHeader from '../../partials/TittleHeader.svelte';
+    import ClientFooter from '@src/partials/ClientFooter.svelte'
+    import View from '@src/components/View.svelte'
+    import TittleHeader from '@src/partials/TittleHeader.svelte';
+    import { sounds } from '@src/lib/sound';
 </script>
 
 <View>
@@ -15,6 +16,9 @@
 
            <div class="flex flex-col items-center mt-10 mx-10">
                 <h2 class={'h2 p-3 '}>Aún no se ha creado el la página de reserva...</h2>
+                <button onclick={() => sounds.ding.play()}>
+                    play
+                </button>
             </div>
         </div>
     {/snippet}

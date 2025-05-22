@@ -1,4 +1,5 @@
 <script lang='ts'>
+  import '@src/lib/sound'
   import { changeTheme, changeThemeEffect } from './lib/darkmode.svelte';
   import { checkSesion, userdata } from './lib/userdata.svelte';
   import { views, currentView } from './lib/viewsCollector';

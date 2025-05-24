@@ -2,10 +2,12 @@ import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mj
 import { GetObjectMessage, SetObjectMessage, DeleteObjectMessage } from "_shared/wsComunication/ObjectMessage.mjs"
 import { BaseMessage } from "_shared/wsComunication/BaseMessage.mjs"
 import { AcceptReserveMessage } from "_shared/wsComunication/AcceptReserveMessage.mjs"
+import { SetOrderLineStatusMessage } from "_shared/wsComunication/SetOrderLineStatusMessage.mjs"
 import { PushNotificationMessage, pushNotificationType } from "_shared/wsComunication/PushNotificationMessage.mjs"
 import WebSocket from "ws"
-import { Product, Reservation, User } from "./DatabaseController.mts"
+import { Order, OrderProduct, Product, Reservation, User } from "./DatabaseController.mts"
 import bcrypt from "bcrypt"
+import { CompleteOrderType } from "_shared/SharedTypes.mjs"
 
 // static class
 export class EventsController {
@@ -17,7 +19,7 @@ export class EventsController {
 
     public static addConnection(sessionId: string, permissionLevel: string, ws: WebSocket) {
         let isAdmin = permissionLevel == "admin"
-        if(isAdmin) {
+        if (isAdmin) {
             this.adminConnections[sessionId] = ws
         }
         this.workerConnections[sessionId] = ws
@@ -31,7 +33,7 @@ export class EventsController {
                 if (eventName in this.events) {
                     this.events[eventName](sessionId, isAdmin, data)
                 }
-            } catch (error) {}
+            } catch (error) { }
         })
     }
 
@@ -41,13 +43,13 @@ export class EventsController {
     }
 
     public static fireAdmins(event: string, message: BaseMessage) {
-        for(let key in this.adminConnections) {
+        for (let key in this.adminConnections) {
             this.adminConnections[key].send(message.toString())
         }
     }
 
     public static fireWorkers(event: string, message: BaseMessage) {
-        for(let key in this.workerConnections) {
+        for (let key in this.workerConnections) {
             this.workerConnections[key].send(message.toString())
         }
     }
@@ -60,8 +62,8 @@ export class EventsController {
     public static pushNotification(type: pushNotificationType, message: string, soloAdmins: boolean = false) {
         let send = new PushNotificationMessage(type)
         send.setSuccess(message)
-        
-        if(soloAdmins) {
+
+        if (soloAdmins) {
             EventsController.fireAdmins(PushNotificationMessage.event, send)
         } else {
             EventsController.fireWorkers(PushNotificationMessage.event, send)
@@ -75,9 +77,9 @@ export class EventsController {
 
 export async function getPreparedListReservations(): Promise<ListObjectsMessage> {
     let reservations = await Reservation.findAll()
-        
+
     let cleanReservations = []
-    for(let reservation of reservations) {
+    for (let reservation of reservations) {
         let user = await User.findByPk(reservation.requestedBy)
         cleanReservations.push({
             id: reservation.id,
@@ -91,9 +93,39 @@ export async function getPreparedListReservations(): Promise<ListObjectsMessage>
 
     {
         let send = new ListObjectsMessage("reservation", cleanReservations)
-    
+
         return send
     }
+}
+
+export async function getCompleteOrder(orderId: number): Promise<CompleteOrderType> {
+    let order = await Order.findByPk(orderId)
+
+    let orderProducts = await OrderProduct.findAll({
+        where: {
+            orderId: orderId
+        }
+    })
+
+    let formalOrder = {
+        id: order.id,
+        name: order.name,
+        status: order.status,
+        orderDate: order.orderDate,
+        lines: []
+    }
+
+    for (let orderProduct of orderProducts) {
+        formalOrder.lines.push({
+            productId: orderProduct.productId,
+            quantity: orderProduct.quantity,
+            annotation: orderProduct.annotation,
+            status: orderProduct.status,
+            name: (await Product.findByPk(orderProduct.productId))?.name
+        })
+    }
+
+    return formalOrder
 }
 
 EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
@@ -101,7 +133,7 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
 
     switch (received.getType()) {
         case "user":
-            if(!isAdmin) {return}
+            if (!isAdmin) { return }
             let users = await User.findAll()
 
             let cleanUsers = users.map(user => {
@@ -112,11 +144,11 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
 
             {
                 let send = new ListObjectsMessage("user", cleanUsers)
-            
+
                 return EventsController.fireSelf(sessionId, send)
             }
         case "product":
-            if(!isAdmin) {return}
+            if (!isAdmin) { return }
             let products = await Product.findAll()
 
             let cleanProducts = products.map(product => {
@@ -126,7 +158,7 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
 
             {
                 let send = new ListObjectsMessage("product", cleanProducts)
-            
+
                 return EventsController.fireSelf(sessionId, send)
             }
 
@@ -134,7 +166,7 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
             let reservations = await Reservation.findAll()
 
             let cleanReservations = []
-            for(let reservation of reservations) {
+            for (let reservation of reservations) {
                 let user = await User.findByPk(reservation.requestedBy)
                 cleanReservations.push({
                     id: reservation.id,
@@ -148,14 +180,28 @@ EventsController.subscribe(ListObjectsMessage.event, async (sessionId: string, i
 
             {
                 let send = new ListObjectsMessage("reservation", cleanReservations)
-            
+
                 return EventsController.fireSelf(sessionId, send)
             }
-    }   
+
+        case "completeOrder":
+            let orders = await Order.findAll()
+
+            let cleanOrders = []
+            for (let order of orders) {
+                cleanOrders.push(await getCompleteOrder(order.id))
+            }
+
+            {
+                let send = new ListObjectsMessage("completeOrder", cleanOrders)
+
+                return EventsController.fireSelf(sessionId, send)
+            }
+    }
 })
 
 EventsController.subscribe(GetObjectMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
-    if(!isAdmin) {return}
+    if (!isAdmin) { return }
 
     let received = GetObjectMessage.fromTable(data)
 
@@ -163,9 +209,9 @@ EventsController.subscribe(GetObjectMessage.event, async (sessionId: string, isA
         case "user":
             let user = received.getUser()
 
-            if(user.id){
+            if (user.id) {
                 let foundedUser = await User.findByPk(user.id)
-                if(!foundedUser){
+                if (!foundedUser) {
                     let send = new GetObjectMessage("user", {})
                     send.setFailure(`Usuario con id ${user.id} no encontrado`)
                     return EventsController.fireSelf(sessionId, send)
@@ -179,9 +225,9 @@ EventsController.subscribe(GetObjectMessage.event, async (sessionId: string, isA
         case "product":
             let product = received.getProduct()
 
-            if(product.id){
+            if (product.id) {
                 let foundedProduct = await Product.findByPk(product.id)
-                if(!foundedProduct){
+                if (!foundedProduct) {
                     let send = new GetObjectMessage("product", {})
                     send.setFailure(`Producto con id ${product.id} no encontrado`)
                     return EventsController.fireSelf(sessionId, send)
@@ -195,13 +241,11 @@ EventsController.subscribe(GetObjectMessage.event, async (sessionId: string, isA
 })
 
 EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
-    if(!isAdmin) {return}
-
     let received = SetObjectMessage.fromTable(data)
 
     switch (received.getType()) {
         case "user":
-
+            if (!isAdmin) { return }
             let params = ["name", "surname", "username", "email", "permissionLevel"]
 
             let user = received.getUser()
@@ -214,7 +258,7 @@ EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isA
                 }
             }
 
-            if(!["admin", "worker", "user"].includes(user.permissionLevel)){
+            if (!["admin", "worker", "user"].includes(user.permissionLevel)) {
                 let send = new SetObjectMessage("user", {})
                 send.setFailure(`Debes seleccionar un nivel de permiso valido`)
                 return EventsController.fireSelf(sessionId, send)
@@ -285,17 +329,18 @@ EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isA
             }
 
         case "product":
+            if (!isAdmin) { return }
             let product = received.getProduct()
 
             if (!product.name || product.name == "") {
                 let send = new SetObjectMessage("product", {})
                 send.setFailure(`Falta el campo name`)
                 return EventsController.fireSelf(sessionId, send)
-            }else if (isNaN(Number(product.stock))) {
+            } else if (isNaN(Number(product.stock))) {
                 let send = new SetObjectMessage("product", {})
                 send.setFailure(`Falta el campo stock`)
                 return EventsController.fireSelf(sessionId, send)
-            }else if (isNaN(Number(product.price))) {
+            } else if (isNaN(Number(product.price))) {
                 let send = new SetObjectMessage("product", {})
                 send.setFailure(`Falta el campo price`)
                 return EventsController.fireSelf(sessionId, send)
@@ -347,12 +392,120 @@ EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isA
                 sendAll.setSuccess("NEW_PRODUCT")
                 return EventsController.fireWorkers(sessionId, sendAll)
             }
-            
+
+        case "order":
+
+            let order = received.getOrder()
+
+            if (!order.lines || order.lines.length == 0) {
+                let send = new SetObjectMessage("order", {})
+                send.setFailure(`Pedido sin productos`)
+                return EventsController.fireSelf(sessionId, send)
+            }
+
+            let foundedOrder = await Order.findByPk(order.id)
+
+            if (!foundedOrder) {
+
+                let newOrder = await Order.create({
+                    name: order.name,
+                    status: "requested",
+                    orderDate: new Date()
+                })
+
+                for (let line of order.lines) {
+                    await OrderProduct.create({
+                        orderId: newOrder.id,
+                        productId: line.productId,
+                        quantity: line.quantity,
+                        annotation: line.annotation ?? '',
+                        status: 'notPrepared'
+                    })
+                }
+
+                let cleanOrder = getCompleteOrder(newOrder.id)
+
+                let send = new SetObjectMessage("completeOrder", cleanOrder)
+                send.setSuccess("Pedido guardado")
+                EventsController.fireSelf(sessionId, send)
+            } else {
+                foundedOrder.name = order.name
+
+                try {
+                    await foundedOrder.save()
+
+                    let currentLines = await OrderProduct.findAll({
+                        where: { orderId: foundedOrder.id }
+                    })
+
+                    let receivedProductIds = order.lines.map(line => line.productId)
+                    let currentProductIds = currentLines.map(line => line.productId)
+
+                    for (let line of currentLines) {
+                        if (!receivedProductIds.includes(line.productId)) {
+                            await line.destroy()
+                        }
+                    }
+
+                    for (let line of order.lines) {
+                        if (!currentProductIds.includes(line.productId)) {
+                            await OrderProduct.create({
+                                orderId: foundedOrder.id,
+                                productId: line.productId,
+                                annotation: line.annotation ?? '',
+                                quantity: line.quantity,
+                                status: 'notPrepared'
+                            })
+                        }else{
+                            let duplicatedLine = await OrderProduct.findOne({
+                                where: { orderId: foundedOrder.id, productId: line.productId }
+                            })
+
+                            if(duplicatedLine.quantity !== line.quantity){
+                                duplicatedLine.quantity = line.quantity
+                            }
+
+                            if(duplicatedLine.annotation !== line.annotation){
+                                duplicatedLine.annotation = line.annotation
+                            }
+
+                            await duplicatedLine.save()
+                        }
+                    }
+
+                } catch (error) {
+                    let send = new SetObjectMessage("order", {})
+                    send.setFailure(`Error al actualizar el pedido`)
+                    return EventsController.fireSelf(sessionId, send)
+                }
+
+                let cleanOrder = foundedOrder.toJSON()
+                cleanOrder.lines = order.lines
+
+                let send = new SetObjectMessage("order", cleanOrder)
+                send.setSuccess("Orden actualizada")
+                EventsController.fireSelf(sessionId, send)
+            }
+
+            let orders = await Order.findAll()
+
+            let cleanOrders = []
+
+            for (let order of orders) {
+                cleanOrders.push(await getCompleteOrder(order.id))
+            }
+
+            {
+                let sendAll = new ListObjectsMessage("completeOrder", cleanOrders)
+                sendAll.setSuccess("NEW_ORDER")
+                return EventsController.fireWorkers(sessionId, sendAll)
+            }
+
     }
 })
 
 EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
-    if(!isAdmin) {return}
+    if (!isAdmin) { return }
 
     let received = DeleteObjectMessage.fromTable(data)
 
@@ -360,9 +513,9 @@ EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, 
         case "user":
             let user = received.getUser()
 
-            if(user.id){
+            if (user.id) {
                 let foundedUser = await User.findByPk(user.id)
-                if(!foundedUser){
+                if (!foundedUser) {
                     let send = new DeleteObjectMessage("user", {})
                     send.setFailure(`El usuario no existe`)
                     return EventsController.fireSelf(sessionId, send)
@@ -389,9 +542,9 @@ EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, 
         case "product":
             let product = received.getProduct()
 
-            if(product.id){
+            if (product.id) {
                 let foundedProduct = await Product.findByPk(product.id)
-                if(!foundedProduct){
+                if (!foundedProduct) {
                     let send = new DeleteObjectMessage("product", {})
                     send.setFailure(`El producto no existe`)
                     return EventsController.fireSelf(sessionId, send)
@@ -422,13 +575,13 @@ EventsController.subscribe(AcceptReserveMessage.event, async (sessionId: string,
 
     let reservation = await Reservation.findByPk(received.getId())
 
-    if(!reservation){
+    if (!reservation) {
         let send = new AcceptReserveMessage(received.getId(), received.isAccepted())
         send.setFailure(`La reserva no existe`)
         return EventsController.fireSelf(sessionId, send)
     }
 
-    if(reservation.status !== 'requested'){
+    if (reservation.status !== 'requested') {
         let send = new AcceptReserveMessage(received.getId(), received.isAccepted())
         send.setFailure(`La reserva ya fue revisada`)
         return EventsController.fireSelf(sessionId, send)
@@ -444,4 +597,48 @@ EventsController.subscribe(AcceptReserveMessage.event, async (sessionId: string,
     let listReservationsEvent = await getPreparedListReservations()
 
     EventsController.fireWorkers(listReservationsEvent.event, listReservationsEvent)
+})
+
+EventsController.subscribe(SetOrderLineStatusMessage.event, async (sessionId: string, isAdmin: boolean, data: any) => {
+
+    let received = SetOrderLineStatusMessage.fromTable(data)
+
+    let orderLineId = received.getOrderLineId()
+    let newStatus = received.getOrderLineStatus()
+
+    let orderLine = await OrderProduct.findOne({
+        where: {
+            orderId: orderLineId.orderId,
+            productId: orderLineId.productId
+        }
+    })
+
+    if (!orderLine) {
+        let send = new SetOrderLineStatusMessage(orderLineId, newStatus)
+        send.setFailure(`No se encontró la línea del pedido`)
+        return EventsController.fireSelf(sessionId, send)
+    }
+
+    orderLine.status = newStatus
+    try {
+        await orderLine.save()
+    } catch (error) {
+        let send = new SetOrderLineStatusMessage(orderLineId, newStatus)
+        send.setFailure(`Error al actualizar el estado de la línea`)
+        return EventsController.fireSelf(sessionId, send)
+    }
+
+    let send = new SetOrderLineStatusMessage(orderLineId, newStatus)
+    send.setSuccess(`Estado de la línea actualizado correctamente`)
+    EventsController.fireSelf(sessionId, send)
+
+    let orders = await Order.findAll()
+    let cleanOrders = []
+    for (let order of orders) {
+        cleanOrders.push(await getCompleteOrder(order.id))
+    }
+
+    let sendAll = new ListObjectsMessage("completeOrder", cleanOrders)
+    sendAll.setSuccess("LINE_STATUS_UPDATED")
+    EventsController.fireWorkers(sendAll.event, sendAll)
 })

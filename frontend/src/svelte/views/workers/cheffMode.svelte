@@ -1,21 +1,164 @@
 <script lang='ts'>
-    import ClientFooter from '../../partials/ClientFooter.svelte'
-    import View from '../../components/View.svelte'
-    import TittleHeader from '../../partials/TittleHeader.svelte';
+    import ClientFooter from '@src/partials/ClientFooter.svelte'
+    import View from '@src/components/View.svelte'
+    import TittleHeader from '@src/partials/TittleHeader.svelte';
+    import toast from 'svelte-french-toast';
+    import { CompleteOrderType } from '_shared/SharedTypes.mjs';
+    import { ListObjectsMessage } from '_shared/wsComunication/ListObjectsMessage.mjs';
+    import { SetOrderLineStatusMessage } from '_shared/wsComunication/SetOrderLineStatusMessage.mjs';
+    import { getWebSocket, onSocketEvent, waitEvent } from '@src/lib/wsComunication';
+    import { getCurrentView, setCurrentView } from '@src/lib/viewsCollector';
+    import Fa from 'svelte-fa';
+    import { faArrowLeft, faClock, faSquareCheck } from '@fortawesome/free-solid-svg-icons';
+    import { sounds } from '@src/lib/sound';
+
+    let orders = $state<CompleteOrderType[]>([])
+    let requested = $state<boolean>(false)
+
+    onSocketEvent(ListObjectsMessage.event, (data) => {
+        if(getCurrentView() !== 'worker.cheffMode'){return}
+        let info = ListObjectsMessage.fromTable(data)
+        if(info.getType() !== 'completeOrder'){return}
+
+        let oneDayOrders = info.getCompleteOrders()
+            .filter(order => {
+                const now = Date.now()
+                const orderDate = new Date(order.orderDate).getTime()
+                return (now - orderDate) < 24 * 60 * 60 * 1000
+            })
+            .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
+
+        
+
+        let sortedOrders = oneDayOrders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
+
+        orders = sortedOrders
+        
+
+        if(info.getMessage() === 'NEW_ORDER'){
+            sounds.bellSound.play()
+        }
+    })
+
+    let statuses = {
+        'notPrepared': 'Por preparar',
+        'making': 'Preparándose',
+        'ready': 'Listo',
+        'delivered': 'Servido',
+    }
+
+    ;(async () => {
+        getWebSocket().then(ws => ws.send(new ListObjectsMessage('completeOrder', orders).toString()))
+        await waitEvent(ListObjectsMessage.event)
+        requested = true
+    })()
+
+    const setBackgroundLineStatus = (status: string) => {
+        if(status === 'notPrepared'){
+            return 'bg-surface-50 dark:bg-surface-900'
+        }else if(status === 'making'){
+            return 'bg-yellow-200 dark:bg-yellow-900'
+        }else if(status === 'ready'){
+            return 'bg-blue-200 dark:bg-blue-900'
+        }else if(status === 'delivered'){
+            return 'bg-green-200 dark:bg-green-900'
+        }else{
+            return ''
+        }
+    }
+
+    const isOrderDelivered = (order) => {
+        return order.lines.length > 0 && order.lines.every(line => line.status === 'delivered')
+    }
+
+    const setBackgroundOrderStatus = (order) => {
+        if(isOrderDelivered(order)){
+            return 'bg-green-200 dark:bg-green-900'
+        }
+        return 'bg-surface-100 dark:bg-surface-900'
+    }
+
+    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <TittleHeader tittle="Modo cocinero" />
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="h-full flex flex-col items-center my-5 space-y-5 px-5">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Aún no se ha creado el la página de cheff...</h2>
+            <div class="flex flex-col gap-y-4 w-full max-w-[400px]">
+                {#if orders.length > 0 && requested}
+                    {#each orders as order (order.id)}
+                    <div class={"space-y-2 div preset-filled-surface-100-900 border-[1px] border-surface-200-800 p-3 " + setBackgroundOrderStatus(order)}>
+                        <h2 class="">{`Pedido #${order.id}`} <b>{order.name ? `(${order.name})` : ''}</b></h2>
+
+                        <div class="hr border-surface-400"></div>
+
+                        <table class="border-collapse border rounded-token-base border-surface-950 w-full text-center">
+                            <tbody class="overflow-x-hidden">
+                                {#each order.lines as line (line.productId)}
+                                    <tr>
+                                        <td class={"border border-surface-950 p-[0.1px] " + setBackgroundLineStatus(line.status)}>
+                                            <div class="flex items-center justify-center px-1">
+                                                {line.quantity}
+                                            </div>
+                                        </td>
+                                        <td class={"border border-surface-950 p-[0.1px] " + setBackgroundLineStatus(line.status)}>
+                                             {line.name}
+                                        </td>
+                                        <td class={"border border-surface-950 p-[0.1px] " + setBackgroundLineStatus(line.status)}>
+                                            <button onclick={async () => {
+                                            getWebSocket().then(ws => ws.send(new SetOrderLineStatusMessage({orderId: order.id, productId: line.productId}, 'making').toString()))
+                                                let dataIn = await waitEvent(SetOrderLineStatusMessage.event)
+                                                let info = SetOrderLineStatusMessage.fromTable(dataIn)
+
+                                                if(info.isOk()){
+                                                    toast.success(info.getMessage())
+                                                }else{
+                                                    toast.error(info.getMessage())
+                                                }
+                                            }} class="mx-auto flex align-center items-center p-1 rounded-md">
+                                                <Fa icon={faClock}/>
+                                            </button>
+                                        </td>
+                                        <td class={"border border-surface-950 p-[0.1px] " + setBackgroundLineStatus(line.status)}>
+                                            <button onclick={async () => {
+                                            getWebSocket().then(ws => ws.send(new SetOrderLineStatusMessage({orderId: order.id, productId: line.productId}, 'ready').toString()))
+                                                let dataIn = await waitEvent(SetOrderLineStatusMessage.event)
+                                                let info = SetOrderLineStatusMessage.fromTable(dataIn)
+
+                                                if(info.isOk()){
+                                                    toast.success(info.getMessage())
+                                                }else{
+                                                    toast.error(info.getMessage())
+                                                }
+                                            }} class="mx-auto flex align-center items-center p-1 rounded-md">
+                                                <Fa icon={faSquareCheck}/>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                    {/each}
+                {:else if requested && orders.length === 0}
+                    <p class="h3 text-center">No se han realizado pedidos todavía.</p>
+                {:else}
+                    <p class="placeholder animate-pulse h2">Cargando...</p>
+                {/if}
             </div>
+
+            
+            <button onclick={() => setCurrentView('worker.pannel')} class={"flex items-center gap-2 mx-auto " + bClass}>
+                <Fa icon={faArrowLeft} size="lg"/> Volver
+            </button>
+                
         </div>
     {/snippet}
 

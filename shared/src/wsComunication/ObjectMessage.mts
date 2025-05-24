@@ -1,4 +1,4 @@
-import type { ProductAttributes, ReservationAttributes, UserAttributes, validObjectType } from "../SharedTypes.mjs";
+import type { CompleteOrderType, OrderType, ProductAttributes, ReservationAttributes, UserAttributes, validObjectType } from "../SharedTypes.mjs";
 import { BaseMessage, type baseContents } from "./BaseMessage.mts";
 
 type objectType = {[key: string]: any}
@@ -48,6 +48,14 @@ export class GetObjectMessage extends BaseMessage {
 
     getReservation(): ReservationAttributes {
         return this.object as ReservationAttributes
+    }
+
+    getOrder(): OrderType {
+        return this.object as OrderType
+    }
+
+    getCompleteOrder(): CompleteOrderType {
+        return this.object as CompleteOrderType
     }
 
     toString(): string {

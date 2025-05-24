@@ -1,27 +1,19 @@
 <script lang='ts'>
     import { modals } from 'svelte-modals';
     import CustomModal from '@src/partials/CustomModal.svelte';
-    import ClientFooter from '@src/partials/ClientFooter.svelte';
     import View from '@src/components/View.svelte';
     import TittleHeader from '@src/partials/TittleHeader.svelte';
-    import { anyObject, ProductAttributes } from '_shared/SharedTypes.mjs';
+    import { lineType, ProductAttributes } from '_shared/SharedTypes.mjs';
     import Fa from 'svelte-fa';
     import { faArrowLeft, faBroom, faCartPlus, faListUl, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
     import { getWebSocket, onSocketEvent, waitEvent } from '@src/lib/wsComunication';
     import { ListObjectsMessage } from '_shared/wsComunication/ListObjectsMessage.mjs';
-    import { getCurrentView } from '@src/lib/viewsCollector';
-    import Product from '../admin/product.svelte';
+    import { getCurrentView, setCurrentView } from '@src/lib/viewsCollector';
     import { storable } from '@src/lib/storable';
     import { get } from 'svelte/store';
+    import { SetObjectMessage } from '_shared/wsComunication/ObjectMessage.mjs';
+    import toast from 'svelte-french-toast';
 
-
-    interface lineType {
-        quantity: number,
-        productId: number,
-        name: string,
-        price: number,
-        extraInfo: string
-    }
 
     let memoProducts = storable<lineType[]>('waiterModeProducts', [])
 
@@ -29,6 +21,7 @@
         memoProducts.set(lines)
     })
 
+    let receiptId = $state<number>(-1)
     let products = $state<ProductAttributes[]>([])
     let productInputSearch = $state<string>('')
     let lines = $state<lineType[]>(get(memoProducts))
@@ -38,10 +31,27 @@
     const cleanDraft = () => {
         lines = []
         receiptName = ''
+        receiptId = -1
+        memoProducts.set(lines)
     }
 
     let displayProducts = $derived(products.filter(product => product.name.toLowerCase().includes(productInputSearch.toLowerCase())))
 
+    let sendToKitchen = async () => {
+        getWebSocket().then(ws => ws.send(new SetObjectMessage('order', {
+            id: receiptId,
+            name: receiptName,
+            lines: lines
+        }).toString()))
+        let response = SetObjectMessage.fromTable(await waitEvent(SetObjectMessage.event))
+        if(response.isOk()){
+            toast.success(response.getMessage())
+            cleanDraft()
+            setCurrentView('worker.viewNotes')
+        }else{
+            toast.error(response.getMessage())
+        }
+    }
 
     onSocketEvent(ListObjectsMessage.event, (data) => {
         if(getCurrentView() !== 'worker.waiterMode'){return}
@@ -75,10 +85,10 @@
                     <table class="border-collapse border rounded-token-base border-surface-950 w-full text-center">
                         <thead>
                             <tr>
-                                <th class="border border-surface-950 p-[0.1px] w-min">Cant.</th>
-                                <th class="border border-surface-950 p-[0.1px] w-max">Producto</th>
-                                <th class="border border-surface-950 p-[0.1px] w-min">Precio</th>
-                                <th class="border border-surface-950 p-[0.1px] w-min">Info.</th>
+                                <th class="border border-surface-950 p-[0.1px] bg-surface-50 w-min">Cant.</th>
+                                <th class="border border-surface-950 p-[0.1px] bg-surface-50 w-max">Producto</th>
+                                <th class="border border-surface-950 p-[0.1px] bg-surface-50 w-min">Precio</th>
+                                <th class="border border-surface-950 p-[0.1px] bg-surface-50 w-min">Info.</th>
                             </tr>
                         </thead>
                         <tbody class="overflow-x-hidden">
@@ -97,15 +107,15 @@
                                         </div>
                                     </td>
                                     <td class="border bg-surface-50 p-[0.1px]">
-                                        <button>Nombre producto</button>
+                                        {line.name}
                                     </td>
                                     <td class="border bg-surface-50 p-[0.1px]">
-                                        {(line.price * line.quantity).toFixed(2)}
+                                        {(products.find(product => product.name === line.name)?.price * line.quantity).toFixed(2).toString().replace('.', ',')} €
                                     </td>
                                     <td class="border bg-surface-50 p-[0.1px]">
                                         <button 
                                         onclick={() => modals.open(CustomModal as any, { customModal: addDescriptionModal })}>
-                                        {line.extraInfo ? '✅' : 'ℹ️'}</button>
+                                        {line.annotation ? '✅' : 'ℹ️'}</button>
                                         {#snippet addDescriptionModal(close)}
                                             <div class="modal-box p-6 preset-filled-surface-100-900 rounded-lg shadow-xl max-w-md mx-auto my-auto">
                                                 <h3 class="font-bold text-lg mb-4">Nota extra para {line.name}</h3>
@@ -113,7 +123,7 @@
                                                 <div class="mb-4">
                                                     <textarea
                                                         placeholder="Añade notas o detalles aquí..."
-                                                        bind:value={line.extraInfo}
+                                                        bind:value={line.annotation}
                                                         class="textarea textarea-bordered w-full h-32 rounded-lg bg-gray-50 resize-y"
                                                     ></textarea>
                                                 </div>
@@ -135,7 +145,7 @@
                     </table>
                 </div>
 
-                <div class="flex justify-around pt-4 flex-wrap">
+                <div class="flex justify-around pt-4 flex-wrap gap-x-2">
                     <button onclick={() => modals.open(CustomModal as any, { customModal: addProductModal })} class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
                         <Fa icon={faCartPlus} size="lg"/> Añadir Producto
                     </button>
@@ -154,8 +164,7 @@
                                             quantity: 1,
                                             productId: product.id,
                                             name: product.name,
-                                            price: product.price,
-                                            extraInfo: ''
+                                            annotation: ''
                                         }
                                         lines.push(line)
                                     }else{
@@ -180,20 +189,19 @@
                     <button onclick={cleanDraft} class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
                         <Fa icon={faBroom} size="lg"/> Limpiar
                     </button>
-                    <button class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
+                    <button onclick={sendToKitchen} class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
                         <Fa icon={faPaperPlane} size="lg"/> Enviar a Cocina
                     </button>
-                    <button class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
+                    <button onclick={() => setCurrentView('worker.viewNotes')} class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
                         <Fa icon={faListUl} size="lg"/> Ver pedidos
+                    </button>
+                    <button onclick={() => setCurrentView('worker.pannel')} class={"flex items-center gap-2 m-2 mx-auto " + bClass}>
+                        <Fa icon={faArrowLeft} size="lg"/> Volver
                     </button>
                 </div>
             </div>
         </div>
        
-    {/snippet}
-
-    {#snippet footer()}
-        <ClientFooter />
     {/snippet}
 </View>
 

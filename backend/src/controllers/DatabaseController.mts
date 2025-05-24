@@ -52,12 +52,23 @@ export const User = sequelize.define<UserAttributes, any>('User', {
     timestamps: true
 });
 
+interface OrderAttributes extends Model {
+  id: number
+  name: string
+  status: 'requested' | 'done'
+  orderDate: Date
+  createdAt?: Date
+  updatedAt?: Date
+}
 
-const Order = sequelize.define('Order', {
+export const Order = sequelize.define<OrderAttributes, any>('Order', {
     id: {
         type: DataTypes.INTEGER.UNSIGNED,
         autoIncrement: true,
         primaryKey: true
+    },
+    name: {
+        type: DataTypes.STRING
     },
     status: {
         type: DataTypes.ENUM('requested', 'done'),
@@ -216,10 +227,27 @@ export const ProductImage = sequelize.define('ProductImage', {
     timestamps: true
 });
 
-export const OrderProduct = sequelize.define('OrderProduct', {
+interface OrderProductAttributes extends Model {
+    orderId: number
+    productId: number
+    quantity: number
+    annotation: string
+    status: 'notPrepared' | 'making' | 'ready' | 'delivered'
+    createdAt?: Date
+    updatedAt?: Date
+}
+
+export const OrderProduct = sequelize.define<OrderProductAttributes, any>('OrderProduct', {
     quantity: {
         type: DataTypes.INTEGER.UNSIGNED,
         defaultValue: 1
+    },
+    status: {
+        type: DataTypes.ENUM('notPrepared', 'making', 'ready', 'delivered'),
+        defaultValue: 'requested'
+    },
+    annotation: {
+        type: DataTypes.STRING
     },
     orderId: {
         type: DataTypes.INTEGER.UNSIGNED,

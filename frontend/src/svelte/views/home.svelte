@@ -13,7 +13,7 @@
     import { LogoutRequest } from '_shared/requests/LogoutRequest.mjs';
     import { initConnection, onSocketEvent } from '../lib/wsComunication';
 
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
+    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md'
     const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
     // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
 </script>
@@ -25,20 +25,16 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col justify-around items-center"><!-- justify-between -->
+        <div class="h-full flex flex-col items-center gap-y-5 py-5"><!-- justify-between -->
 
-            <!-- <button class="p-4 bg-surface-200" onclick={() => setCurrentView('pannel')}>jose . 2</button> -->
-
-            <div class="flex flex-col items-center mt-10 mx-10">
+            <div class="flex flex-col items-center mx-10">
                 <h2 class={'h2 p-3 ' + pClass}>¡Bienvenido!</h2>
             </div>
             
-            <div class="flex flex-col items-center gap-8 mx-10">
-                <p class={"text-center p-3 " + pClass}>Bienvenido al portal web del restaurante Josemar.</p>
-                <p class={"text-center p-3 mt-5 " + pClass}>En esta aplicación puedes ver el menú del día o realizar reservas y sobre todo ver los productos disponibles.</p>
-            </div>
+            <p class={"text-center p-3 mx-5 " + pClass}>Bienvenido al portal web del restaurante Josemar.</p>
+            <p class={"text-center p-3 mx-5 " + pClass}>En esta aplicación puedes ver el menú del día o realizar reservas y sobre todo ver los productos disponibles.</p>
 
-            <div class={"flex flex-col items-center p-5 mb-10 " + pClass}>
+            <div class={"flex flex-col items-center p-5 " + pClass}>
                 {#if !$userdata.id}
                     <button class={"flex items-center gap-2 mb-5 " + bClass} onclick={() => setCurrentView('register')}>
                         <Fa icon={faUserPlus} size="lg" /> Registrarse

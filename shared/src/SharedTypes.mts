@@ -46,4 +46,35 @@ export interface anyObject {
   [key: string]: any
 }
 
-export type validObjectType = 'null' | 'user' | 'order' | 'reservation' | 'product'
+export interface lineType {
+  quantity: number,
+  productId: number,
+  name: string,
+  annotation: string
+}
+
+export interface OrderType {
+  id: number
+  name: string
+  lines: lineType[]
+}
+
+export type orderLineStatus = 'notPrepared' | 'making' | 'ready' | 'delivered'
+
+export type CompleteOrderType = {
+    id: number
+    name: string
+    status: 'requested' | 'done'
+    orderDate: Date
+    lines: {
+        productId: number
+        quantity: number
+        annotation: string
+        status: orderLineStatus
+        name: string | undefined
+    }[]
+}
+
+export type orderLineId = { orderId: number, productId: number }
+
+export type validObjectType = 'null' | 'user' | 'order' | 'reservation' | 'product' | 'completeOrder'

@@ -5,13 +5,14 @@
     "url": "https://github.com/abdedarghal111"
   },
   "scripts": {
-    "dev": "concurrently \"cd frontend && npm run buildWatch\" \"cd backend && npm run dev\"",
-    "build": "cd backend && npm run build && cd ../frontend && npm run build && cd ..",
+    "dev": "concurrently \"cd frontend && yarn run buildWatch\" \"cd backend && yarn run dev\"",
+    "build": "cd backend && yarn install && yarn run build && cd ../frontend && yarn install && yarn run build && cd ..",
     "start": "pm2 start dist/app.mjs --name jvw --log serverData/app.log",
     "stop": "pm2 stop jvw"
   },
   "dependencies": {
     "concurrently": "^9.1.2",
-    "pm2": "^6.0.6"
+    "pm2": "^6.0.6",
+    "yarn": "^1.22.22"
   }
 }

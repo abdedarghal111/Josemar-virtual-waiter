@@ -4,3 +4,4 @@ server.key
 storage.sqlite
 sessions.sqlite
 .env
+app.log

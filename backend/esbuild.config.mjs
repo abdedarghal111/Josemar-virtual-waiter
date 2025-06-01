@@ -9,7 +9,6 @@ import c from 'colors'
 /*
 Parámetros disponibles:
 --dev  => compilar para desarrollo
---production  => compilar para producción (lo empaqueta)
 --no-clean    => no realiza la limpieza
 --clean       => realiza limpieza de directorios (por defecto)
 */
@@ -63,9 +62,7 @@ if (checkParam('--dev')) {
           const filePath = args[0];
           const __filename = fileURLToPath("file://" + filePath);
           const __dirname = path.dirname(__filename);
-          // console.log(filePath)
           const relativePath = path.relative(__dirname, __src+'/shared');
-          // console.log(relativePath)
           return relativePath.replace('\\', '/') + "/"
         }
       }),
@@ -116,35 +113,6 @@ if (checkParam('--dev')) {
   }
 
   // copyFileSync(`${__src}/../node_modules`, `${__dist}/node_modules`)
-} else if (checkParam('--production')) {
-  // configuración para desarrollo
-  await esbuild.build({
-    logLevel: 'info',
-    entryPoints: [`${__src}/app.mts`, {in: `${__src}/*.mts`, out: `${__dist}/app.mjs`}],
-    sourceRoot: __src,
-    outdir: __dist,
-    bundle: true,
-    minify: true,
-    sourcemap: true,
-    target: 'es2022',
-    platform: 'node',
-    format: 'esm',
-    outExtension: {
-      '.js': '.mjs'
-    },
-    external: [],
-    tsconfig: './tsconfig.json',
-    plugins: [
-      copy({
-        assets: [
-          {
-            from: [`${__src}/**/{*.txt,*.img}`],
-            to: [__dist],
-          },
-        ],
-      })
-    ],
-  }).catch(() => process.exit(1))
 }else{
   if(!checkParam('--clean')){
     console.log(c.yellow('\n==> Aviso: No se ha especificado ')+c.red('--production')+c.yellow(' o ')+c.red('--dev')+c.yellow(' como parámetro'))

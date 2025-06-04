@@ -13,7 +13,6 @@ import { SetReservationRequest } from "_shared/requests/SetReservationRequest.mj
 import { ListMyReservesRequest } from "_shared/requests/ListMyReservesRequest.mjs"
 import { DeleteReservationRequest } from "_shared/requests/DeleteReservationRequest.mjs"
 import { ProductAttributes, ReservationAttributes } from "_shared/SharedTypes.mjs"
-import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs"
 
 const app = HttpController.express
 const API = '/api/'

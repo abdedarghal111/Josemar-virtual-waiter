@@ -1,5 +1,5 @@
 import express from 'express';
-import { readFileSync } from 'fs';
+import http from 'http';
 import https from 'https';
 import session from 'express-session'
 import { Sequelize } from 'sequelize'
@@ -7,12 +7,24 @@ import SessionSequelize from 'connect-session-sequelize'
 import { __public, __static, ENV_FILE_PATH, SERVER_CRT_FILE_PATH, SERVER_KEY_FILE_PATH, SESSION_DB_FILE_PATH } from './../paths.mjs';
 import dotenv from 'dotenv'
 import helmet from 'helmet';
+import { readFileSync } from 'fs';
+
+// variables
+let secureCookie = true
+let httpsMode = true
+let PORT = 443;
+
+if(process.argv.find(val => val === '--dev')){
+  PORT = 8295;
+  secureCookie = false
+  httpsMode = false
+}
+
 
 // cargando variables de entorno
 dotenv.config({ path: ENV_FILE_PATH })
 
 //userData
-
 export interface UserSessionDataType {
   [key: string]: any
 }
@@ -41,10 +53,10 @@ await sequelize.sync()
 
 // Iniciar del servidor
 const app = express();
-const httpsServer = https.createServer({
+const httpsServer = httpsMode ? https.createServer({
   key: readFileSync(SERVER_KEY_FILE_PATH, 'utf-8'),
   cert: readFileSync(SERVER_CRT_FILE_PATH, 'utf-8')
-}, app);
+}, app) : http.createServer(app);
 
 // Express config
 let sessionParser = session({
@@ -53,7 +65,7 @@ let sessionParser = session({
   store: sessionStore,
   saveUninitialized: false,
   cookie: {
-    secure: true,
+    secure: secureCookie,
     // maxAge: 1000 * 60 * 30 // 30 minutos
   }
 })
@@ -61,16 +73,18 @@ let sessionParser = session({
 app.use(express.static(__public));
 app.use(express.json())
 app.use(sessionParser)
-app.use(helmet(
-  {
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+if(httpsMode){
+  app.use(helmet(
+    {
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+        },
       },
-    },
-  }
-))
+    }
+  ))
+}
 
 app.get('/', (req, res) => {
   res.sendFile(`${__static}/index.html`);
@@ -85,9 +99,10 @@ export class HttpController {
 
     static startServer() {
         // Iniciar el servidor
-        const PORT = 443;
+        // httpsServer.
         httpsServer.listen(PORT, () => {
-        console.log(`Servidor corriendo en https://localhost:${PORT}`);
+          //listening in my ip
+          console.log(`Servidor corriendo en https://localhost:${PORT}`);
         });
     }
 }

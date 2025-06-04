@@ -2,7 +2,8 @@ import toast from "svelte-french-toast";
 import { get, writable } from "svelte/store";
 import { BaseMessage } from "_shared/wsComunication/BaseMessage.mts";
 
-export const serverWS = `wss://${window.location.host}`
+let isSecure = window.location.protocol === 'https'
+export const serverWS = `ws${isSecure ? 's' : ''}://${window.location.host}`
 
 let socket = writable<null | WebSocket>(null)
 type messageCallbackType = (data: any) => void

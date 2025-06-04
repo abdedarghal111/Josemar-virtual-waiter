@@ -5,10 +5,10 @@
     "url": "https://github.com/abdedarghal111"
   },
   "scripts": {
-    "build": "node esbuild.config.mjs --dev && npm run installModules",
+    "build": "node esbuild.config.mjs --dev",
     "watch": "node esbuild.config.mjs --dev --watch",
     "installModules": "shx cp package.json ../dist/package.json && cd ../dist && yarn install",
-    "runWatch": "nodemon ../dist/app.mjs --watch ../dist/",
+    "runWatch": "nodemon --watch ../dist/ ../dist/app.mjs --dev",
     "dev": "npm run build && concurrently \"npm run watch\" \"npm run runWatch\""
   },
   "dependencies": {

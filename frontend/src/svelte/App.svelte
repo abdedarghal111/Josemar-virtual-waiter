@@ -32,6 +32,8 @@
     })
     loadingScreen = false
   })
+
+  document.body.style.height = `${window.innerHeight}px`
 </script>
 
 
@@ -51,6 +53,10 @@
       }
     }
 }></svelte:body>
+
+<svelte:window on:resize={(e) => {
+  document.body.style.height = `${window.innerHeight}px`
+}}></svelte:window>
 
 <Modals>
   <!-- shown when any modal is opened -->

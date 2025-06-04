@@ -2,7 +2,7 @@
     let { header = null, main, footer = null } = $props()
 </script>
 
-<wrapper class="w-full h-screen flex flex-col box-border">
+<wrapper class="w-full h-full flex flex-col box-border">
     {#if header}
         <header class="max-w-full">
             {@render header()}

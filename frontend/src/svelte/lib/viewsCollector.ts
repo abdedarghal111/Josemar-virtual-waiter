@@ -36,6 +36,7 @@ export function setCurrentView(view: string, newParams: { [key: string]: any } =
     previusView = get(currentView)
     parameters.set(newParams)
     currentView.set(view)
+    history.pushState({}, '', toHtmlViews[view] || '/inicio');
 }
 
 export function getParameters() {
@@ -82,3 +83,41 @@ export const views = {
     "admin.listReservations": AdminListReservations,
     // "admin.reservation": AdminReservation
 }
+
+export const toHtmlViews = {
+    "home": "/inicio",
+    "pannel": "/panel",
+    "register": "/registro",
+    "profile": "/perfil",
+    "login": "/iniciar-sesion",
+    "startScreen": "/pantalla-inicio",
+
+    "user.products": "/usuario/productos",
+    "user.reserveMenu": "/usuario/menu-reservas",
+    "user.reserve": "/usuario/reservar",
+    "user.listReserves": "/usuario/lista-reservas",
+
+    "worker.pannel": "/empleado/panel",
+    "worker.waiterMode": "/empleado/modo-camarero",
+    "worker.acceptReserves": "/empleado/aceptar-reservas",
+    "worker.cheffMode": "/empleado/modo-chef",
+    "worker.viewNotes": "/empleado/ver-notas",
+
+    "admin.editDatabase": "/admin/editar-base-datos",
+    "admin.listUsers": "/admin/lista-usuarios",
+    "admin.user": "/admin/usuario",
+    "admin.listProducts": "/admin/lista-productos",
+    "admin.product": "/admin/producto",
+    "admin.listReservations": "/admin/lista-reservas"
+};
+
+export const fromHtmlViews = Object.fromEntries(
+    Object.entries(toHtmlViews).map(([key, path]) => [path, key])
+);
+
+
+window.addEventListener('popstate', () => {
+    const path = window.location.pathname;
+    const viewKey = fromHtmlViews[path] || 'home';
+    setCurrentView(viewKey);
+});

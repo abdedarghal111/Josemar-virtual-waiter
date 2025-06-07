@@ -38,9 +38,11 @@
 
 
 {#if loadingScreen}
+  <!-- svelte-ignore svelte_component_deprecated -->
   <svelte:component this={views['startScreen']}/>
 {:else}
   {#key $currentView}
+    <!-- svelte-ignore svelte_component_deprecated -->
     <svelte:component this={views[$currentView]}/>
   {/key}
 {/if}

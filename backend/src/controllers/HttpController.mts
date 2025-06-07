@@ -7,7 +7,8 @@ import SessionSequelize from 'connect-session-sequelize'
 import { __public, __static, ENV_FILE_PATH, SERVER_CRT_FILE_PATH, SERVER_KEY_FILE_PATH, SESSION_DB_FILE_PATH } from './../paths.mjs';
 import dotenv from 'dotenv'
 import helmet from 'helmet';
-import { readFileSync } from 'fs';
+import fs from 'fs';
+import path from 'path';
 
 // variables
 let secureCookie = true
@@ -54,8 +55,8 @@ await sequelize.sync()
 // Iniciar del servidor
 const app = express();
 const httpsServer = httpsMode ? https.createServer({
-  key: readFileSync(SERVER_KEY_FILE_PATH, 'utf-8'),
-  cert: readFileSync(SERVER_CRT_FILE_PATH, 'utf-8')
+  key: fs.readFileSync(SERVER_KEY_FILE_PATH, 'utf-8'),
+  cert: fs.readFileSync(SERVER_CRT_FILE_PATH, 'utf-8')
 }, app) : http.createServer(app);
 
 // Express config
@@ -69,8 +70,6 @@ let sessionParser = session({
     // maxAge: 1000 * 60 * 30 // 30 minutos
   }
 })
-
-app.use(express.static(__public));
 app.use(express.json())
 app.use(sessionParser)
 if(httpsMode){
@@ -86,9 +85,33 @@ if(httpsMode){
   ))
 }
 
+//app.use(express.static(__public)) ==> public
+app.get('/public/*path', (req, res) => {
+  const filePath = path.join(__public, req.params['path'][0])
+  const normalizedPath = path.normalize(filePath)
+
+  // Verifica que el archivo esté dentro del directorio público
+  if (!normalizedPath.startsWith(__public)) {
+    res.status(403).send('Access denied')
+  }
+
+  // Verifica si el archivo existe
+  fs.access(normalizedPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).send('File not found')
+    }
+    res.sendFile(normalizedPath)
+  })
+})
+
 app.get('/', (req, res) => {
-  res.sendFile(`${__static}/index.html`);
+  res.sendFile(`${__static}/index.html`)
 });
+
+app.get('/*any', (req, res) => {
+  res.sendFile(`${__static}/index.html`)
+});
+
 
 
 export class HttpController {
@@ -102,7 +125,7 @@ export class HttpController {
         // httpsServer.
         httpsServer.listen(PORT, () => {
           //listening in my ip
-          console.log(`Servidor corriendo en https://localhost:${PORT}`);
+          console.log(`Servidor corriendo en http${httpsMode ? 's' : ''}://localhost:${PORT}`);
         });
     }
 }

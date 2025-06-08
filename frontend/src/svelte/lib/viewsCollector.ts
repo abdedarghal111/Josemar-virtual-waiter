@@ -4,7 +4,6 @@ import { storable } from './storable';
 import Home from '@src/views/home.svelte'
 import Pannel from '@src/views/workers/pannel.svelte'
 import Register from '@src/views/register.svelte'
-import Profile from '@src/views/profile.svelte'
 // import InfoScreen from '@src/views/infoScreen.svelte'
 import Login from '@src/views/login.svelte'
 import StartScreen from '@src/views/startScreen.svelte';
@@ -26,40 +25,13 @@ import AdminUser from '@src/views/admin/user.svelte';
 import AdminListProducts from '@src/views/admin/listProducts.svelte';
 import AdminProduct from '@src/views/admin/product.svelte';
 import AdminListReservations from '@src/views/admin/listReservations.svelte';
+import { userdata } from './userdata.svelte';
 // import AdminReservation from '@src/views/admin/reservation.svelte';
-
-export let currentView = storable<string>('currentView', 'home')
-export let parameters = storable<{ [key: string]: any }>('parameters', {})
-let previusView = get(currentView)
-
-export function setCurrentView(view: string, newParams: { [key: string]: any } = {}) {
-    previusView = get(currentView)
-    parameters.set(newParams)
-    currentView.set(view)
-    history.pushState({}, '', toHtmlViews[view] || '/inicio');
-}
-
-export function getParameters() {
-    return get(parameters)
-}
-
-export function getCurrentView() {
-    return get(currentView)
-}
-
-export function setPreviusView(){
-    if(get(currentView) === previusView && previusView !== 'login' && previusView !== 'register'){
-        setCurrentView(previusView)
-    }else{
-        setCurrentView('home')
-    }
-}
 
 export const views = {
     home: Home,
     pannel: Pannel,
     register: Register,
-    profile: Profile,
     // infoScreen: InfoScreen,
     login: Login,
     startScreen: StartScreen,
@@ -88,7 +60,6 @@ export const toHtmlViews = {
     "home": "/inicio",
     "pannel": "/panel",
     "register": "/registro",
-    "profile": "/perfil",
     "login": "/iniciar-sesion",
     "startScreen": "/pantalla-inicio",
 
@@ -109,7 +80,40 @@ export const toHtmlViews = {
     "admin.listProducts": "/admin/lista-productos",
     "admin.product": "/admin/producto",
     "admin.listReservations": "/admin/lista-reservas"
-};
+}
+
+export let currentView = storable<string>('currentView', 'home')
+export let parameters = storable<{ [key: string]: any }>('parameters', {})
+let previusView = get(currentView)
+
+export function setCurrentView(view: string, newParams: { [key: string]: any } = {}) {
+    previusView = get(currentView)
+    parameters.set(newParams)
+    currentView.set(view)
+    history.pushState({}, '', toHtmlViews[view] || '/inicio');
+}
+
+export function replaceCurrentView(view: string, newParams: { [key: string]: any } = {}) {
+    parameters.set(newParams)
+    currentView.set(view)
+    history.replaceState({}, '', toHtmlViews[view] || '/inicio');
+}
+
+export function getParameters() {
+    return get(parameters)
+}
+
+export function getCurrentView() {
+    return get(currentView)
+}
+
+export function setPreviusView(){
+    if(get(currentView) === previusView && previusView !== 'login' && previusView !== 'register'){
+        setCurrentView(previusView)
+    }else{
+        setCurrentView('home')
+    }
+}
 
 export const fromHtmlViews = Object.fromEntries(
     Object.entries(toHtmlViews).map(([key, path]) => [path, key])
@@ -121,3 +125,23 @@ window.addEventListener('popstate', () => {
     const viewKey = fromHtmlViews[path] || 'home';
     setCurrentView(viewKey);
 });
+
+const path = window.location.pathname;
+const viewKey = fromHtmlViews[path] || 'home';
+setCurrentView(viewKey);
+
+export function returnToHomeIfLogged() {
+    if(get(userdata).id){
+        setTimeout(() => {
+            replaceCurrentView('home')
+        }, 100)
+    }
+}
+
+export function returnToHomeIfNotLogged() {
+    if(!get(userdata).id){
+        setTimeout(() => {
+            replaceCurrentView('home')
+        }, 100)
+    }
+}

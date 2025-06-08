@@ -1,6 +1,6 @@
 document.documentElement.dataset.theme = 'jvwTheme'
 
-let darkTheme = $state(false)
+let darkTheme = $state(true)
 
 export function changeThemeEffect(){
     if(darkTheme){
@@ -11,5 +11,5 @@ export function changeThemeEffect(){
 }
 
 export function changeTheme(){
-    // darkTheme = !darkTheme
+    darkTheme = !darkTheme
 }

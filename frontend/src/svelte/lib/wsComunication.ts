@@ -73,7 +73,7 @@ export function initConnection(){
         if (event.code >= 1000 && event.code <= 1003) {
             toast.success("Desconectado correctamente");
         } else {
-            toast.success('Escucha cerrada')
+            // toast.success('Escucha cerrada')
             console.error(`Error de conexión (código ${event.code}): ${event.reason || 'Conexión rechazada'}`);
         }
         socket.set(null);

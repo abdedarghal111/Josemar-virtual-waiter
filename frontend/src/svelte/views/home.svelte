@@ -18,7 +18,7 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center justify-around gap-y-5 py-5">
+        <div class="min-h-full flex flex-col items-center justify-around gap-y-5 py-5">
 
             <div class="border-s-2 border-surface-900 text-start mx-5 ps-3">
                 <h3 class="h3 text-surface-950">Josemar Virtual Waiter</h3>

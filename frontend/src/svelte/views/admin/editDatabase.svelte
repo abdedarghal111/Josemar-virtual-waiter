@@ -18,7 +18,7 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col justify-center gap-10 items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col justify-center gap-10 items-center"><!-- justify-between -->
 
             <div class={"flex flex-col items-center mt-10 mx-10 " + pClass}>
                 <h2 class={'h2 p-3 ' + pClass}>Panel de trabajo</h2>

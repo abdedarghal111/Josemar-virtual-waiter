@@ -1,8 +1,7 @@
 <script lang='ts'>
     import ClientFooter from '@src/partials/ClientFooter.svelte'
     import View from '@src/components/View.svelte'
-    import TittleHeader from '@src/partials/TittleHeader.svelte';
-    import { faArrowLeft, faCalendarCheck, faCalendarDays, faList, faRectangleXmark } from '@fortawesome/free-solid-svg-icons';
+    import { faArrowLeft, faCalendarCheck, faRectangleXmark } from '@fortawesome/free-solid-svg-icons';
     import { getParameters, returnToHomeIfNotLogged, setCurrentView } from '@src/lib/viewsCollector';
     import Fa from 'svelte-fa';
     import { type ReservationAttributes } from '_shared/SharedTypes.mjs';
@@ -12,6 +11,8 @@
     import { DeleteReservationRequest } from '_shared/requests/DeleteReservationRequest.mts';
     import { convertToDateTimeLocalString } from '_shared/helpers.mjs'
     import axios from 'axios';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 
     returnToHomeIfNotLogged()
     
@@ -49,6 +50,7 @@
                 if(request.isOk()){
                     let newReservation = request.getReservation()
                     reservation.id = newReservation.id
+                    reservation.status = newReservation.status
                     reservation.requestDate = new Date(newReservation.requestDate)
                     reservation.numAdults = newReservation.numAdults
                     reservation.numMinors = newReservation.numMinors
@@ -138,80 +140,74 @@
 
         submitButton.disabled = false
     }
-
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md'
-    const bDangerClass = ' btn preset-filled-error-500 p-3 rounded-md'
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="user.reserveMenu" currentPage="Solicitar reserva" />
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center gap-6 p-6">
-            <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800">
-                <div class="p-4">
+        <div class="min-h-full flex flex-col items-center gap-7 m-5">
+            <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3">
+                <div class="w-full">
                     {#if reservation.status === 'requested'}
                         {#if id}
-                            <h3 class="h5 font-bold mb-2">Editar Reserva</h3>
+                            <h3 class="h3 font-bold">Editar Reserva</h3>
                             <p class="text-sm opacity-70">La reserva no ha sido revisada aún, puedes editarla o eliminarla.</p>
                         {:else}
-                            <h3 class="h5 font-bold mb-2">Nueva Reserva</h3>
+                            <h3 class="h3 font-bold">Nueva Reserva</h3>
                             <p class="text-sm opacity-70">Crea una nueva reserva para disfrutar de nuestro restaurante.</p>
                         {/if}
                     {:else if reservation.status === 'accepted'}
-                        <h3 class="h5 font-bold mb-2">"Reserva aceptada"</h3>
+                        <h3 class="h3 font-bold">Reserva aceptada</h3>
                         <p class="text-sm opacity-70">Las reservas aceptadas no se pueden editar, solo visualizar.</p>
                     {:else}
-                        <h3 class="h5 font-bold mb-2">"Reserva rechazada"</h3>
+                        <h3 class="h3 font-bold">Reserva rechazada</h3>
                         <p class="text-sm opacity-70">Las reservas rechazadas no se pueden editar, solo visualizar.</p>
                     {/if}
                 </div>
-            </div>
-            <form onsubmit={onSubmit} class="space-y-4">
-                <div class="space-y-2">
-                    <label for="requestDate" class="label">
-                    <span class="label-text text-lg">Fecha y hora:</span>
-                    </label>
-                    <input {readonly} {disabled} type="datetime-local" id="clientReservation/requestDate" class="input input-bordered w-full" value={convertToDateTimeLocalString(new Date())} />
-                </div>
 
-                <div class="space-y-2">
-                    <label for="numAdults" class="label">
-                    <span class="label-text text-lg">Adultos:</span>
-                    </label>
-                    <input {readonly} {disabled} type="number" id="clientReservation/numAdults" class="input input-bordered w-full" bind:value={reservation.numAdults} min="0" />
-                </div>
+                <form onsubmit={onSubmit} class="space-y-3 mt-7">
+                    <div class="space-y-2">
+                        <label for="requestDate" class="label">
+                        <span class="label-text">Fecha y hora:</span>
+                        </label>
+                        <input {readonly} {disabled} type="datetime-local" id="clientReservation/requestDate" class="input text-sm input-bordered w-full" value={convertToDateTimeLocalString(new Date())} />
+                    </div>
 
-                <div class="space-y-2">
-                    <label for="numMinors" class="label">
-                    <span class="label-text text-lg">Niños:</span>
-                    </label>
-                    <input {readonly} {disabled} type="number" id="clientReservation/numMinors" class="input input-bordered w-full" bind:value={reservation.numMinors} min="0" />
-                </div>
+                    <div class="space-y-2">
+                        <label for="numAdults" class="label">
+                        <span class="label-text">Adultos:</span>
+                        </label>
+                        <input {readonly} {disabled} type="number" id="clientReservation/numAdults" class="input text-sm input-bordered w-full" bind:value={reservation.numAdults} min="0" />
+                    </div>
 
-                <div class="flex flex-col gap-5 items-center justify-center">
-                    <button id="clientReservation/submit" class={"gap-2 mt-5 " + bClass}  type="submit">
-                        <Fa icon={faCalendarCheck} size="lg" /> 
-                        {#if id}
-                            Confirmar modificación
-                        {:else}
-                            Solicitar reserva
-                        {/if}
-                    </button>
-                    {#if id && reservation.status === 'requested'}
-                        <button id="clientReservation/delete" class={"gap-2 mt-5 " + bDangerClass} onclick={submitDelete}>
-                            <Fa icon={faRectangleXmark} size="lg" /> Cancelar solicitud
+                    <div class="space-y-2">
+                        <label for="numMinors" class="label">
+                        <span class="label-text">Niños:</span>
+                        </label>
+                        <input {readonly} {disabled} type="number" id="clientReservation/numMinors" class="input text-sm input-bordered w-full" bind:value={reservation.numMinors} min="0" />
+                    </div>
+
+                    <div class="flex flex-col gap-5 items-center justify-center mt-7">
+                        <button id="clientReservation/submit" class="w-fit btn preset-filled-success-500 bg-success-300 p-2 card text-sm"  type="submit">
+                            <Fa icon={faCalendarCheck} size="lg" /> 
+                            {#if id}
+                                Confirmar modificación
+                            {:else}
+                                Solicitar reserva
+                            {/if}
                         </button>
-                    {/if}
-                </div>
-            </form>
-            <button class={"gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserveMenu')}>
-                <Fa icon={faArrowLeft} size="lg" /> ir atras
-            </button>
+                        {#if id && reservation.status === 'requested'}
+                            <IconButton icon={faRectangleXmark} text="Cancelar solicitud" onclick={submitDelete} extraClass="preset-filled-warning-500"/>
+                        {/if}
+                    </div>
+                </form>
+            </div>
+
+            <IconButton icon={faArrowLeft} text="Ir atras"  onclick={() => setCurrentView('user.reserveMenu')} extraClass="mb-2 text-surface-50 bg-surface-900"/>
         </div>
     {/snippet}
 

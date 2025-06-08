@@ -88,7 +88,7 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center my-5 space-y-5 px-5">
+        <div class="min-h-full flex flex-col items-center my-5 space-y-5 px-5">
 
             <div class="flex flex-col gap-y-4 w-full max-w-[400px]">
                 {#if orders.length > 0 && requested}

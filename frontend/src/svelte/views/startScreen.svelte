@@ -14,7 +14,7 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col justify-around items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col justify-around items-center"><!-- justify-between -->
 
             <div class="flex flex-col items-center mt-10 mx-10 text-surface-950">
                 <h2 class={'h2 p-3 ' + pClass}>¡Bienvenido a JVW!, si ves esta pantalla es porque la aplicación está cargando.</h2>

@@ -19,7 +19,7 @@
         <div class="min-h-full flex flex-col justify-center items-center">
 
 
-            <div class="flex flex-col items-center gap-10 p-3 shadow bg-surface-900 card max-w-80 m-3">
+            <div class="flex flex-col items-center gap-10 p-3 shadow bg-surface-900 card max-w-70 m-3">
                 <div class="w-full">
                     <h3 class='h3'>Panel de reservas</h3>
                     <p class="text-surface-50/85">Aquí puedes realizar y gestionar reservas. Una vez realizada, nuestro equipo la revisará en menos de 24 horas.</p>

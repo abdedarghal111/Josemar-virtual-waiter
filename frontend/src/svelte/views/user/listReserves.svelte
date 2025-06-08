@@ -6,9 +6,11 @@
     import { ListMyReservesRequest } from '_shared/requests/ListMyReservesRequest.mjs';
     import toast from 'svelte-french-toast';
     import { type ReservationAttributes } from '_shared/SharedTypes.mjs';
+    import IconButton from '@src/components/IconButton.svelte';
     import Fa from 'svelte-fa';
     import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
     import { returnToHomeIfNotLogged, setCurrentView } from '@src/lib/viewsCollector';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
 
     returnToHomeIfNotLogged()
 
@@ -49,11 +51,11 @@
 
     const setBackgroudReservationStatus = (status: string) => {
         if(status === 'requested'){
-            return 'bg-surface-300 dark:bg-surface-900'
+            return 'bg-tertiary-400 border-tertiary-700 text-tertiary-950'
         }else if(status === 'accepted'){
-            return 'bg-green-200 dark:bg-green-900'
+            return 'bg-success-400 border-success-700 text-success-950'
         }else{
-            return 'bg-red-200 dark:bg-red-900'
+            return 'bg-error-400 border-error-700 text-error-950'
         }
     }
 </script>
@@ -61,19 +63,19 @@
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="user.reserveMenu" currentPage="Mis reservas" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Reservas</h2>
+           <div class="flex flex-col items-center my-3 max-w-xl mx-3">
+                <h2 class='h2 pb-3 text-surface-950'>Reservas</h2>
 
-                <div class="grid gap-4">
+                <div class="grid gap-3">
                     {#if reservations.length > 0 && requested}
                         {#each reservations as reservation}
-                        <button class={setBackgroudReservationStatus(reservation.status) + ` card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5`} onclick={() => setCurrentView('user.reserve', {id: reservation.id})}>
+                        <button class={setBackgroudReservationStatus(reservation.status) + ` card preset-filled-surface900 border-[1px] card-hover block`} onclick={() => setCurrentView('user.reserve', {id: reservation.id})}>
                             <article class="p-2">
                                 <h2 class="h6 font-bold">Reserva #{reservation.id}</h2>
                                 <p class="text-sm">Fecha: {new Date(reservation.requestDate).toLocaleDateString()} {new Date(reservation.requestDate).toLocaleTimeString()}</p>
@@ -96,9 +98,8 @@
                 </div>
             </div>
 
-            <button class={"flex items-center gap-2 mt-5 mb-5 " + bClass} onclick={() => setCurrentView('user.reserveMenu')}>
-                <Fa icon={faArrowLeft} size="lg" /> Volver
-            </button>
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('user.reserveMenu')} extraClass="mt-5 mb-2 text-surface-50 bg-surface-900" />
+
         </div>
     {/snippet}
 

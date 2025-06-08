@@ -6,9 +6,8 @@
     "url": "https://github.com/abdedarghal111"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "buildWatch": "vite build --watch",
+    "dev": "vite build --mode development --config developing.config.mjs --watch",
+    "build": "vite build --config production.config.mjs",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },

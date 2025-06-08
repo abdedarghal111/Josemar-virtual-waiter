@@ -1,82 +1,63 @@
 <script lang='ts'>
-    import Fa from 'svelte-fa'
     import { faCalendarDays, faAddressCard, faUserPlus, faBurger, faDoorOpen, faBriefcase } from '@fortawesome/free-solid-svg-icons'
     import ClientFooter from '../partials/ClientFooter.svelte'
-    // import { UserRoundPlus } from '@lucide/svelte'
-
     import { setCurrentView } from '../lib/viewsCollector'
     import View from '../components/View.svelte'
     import { logout, userdata } from '../lib/userdata.svelte';
-    import TittleHeader from '../partials/TittleHeader.svelte';
     import toast from 'svelte-french-toast';
     import axios from 'axios';
     import { LogoutRequest } from '_shared/requests/LogoutRequest.mjs';
-    import { initConnection, onSocketEvent } from '../lib/wsComunication';
-
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
-    // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader currentPage="Inicio" />
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center gap-y-5 py-5"><!-- justify-between -->
+        <div class="h-full flex flex-col items-center justify-around gap-y-5 py-5">
 
-            <div class="flex flex-col items-center mx-10">
-                <h2 class={'h2 p-3 ' + pClass}>¡Bienvenido!</h2>
+            <div class="border-s-2 border-surface-900 text-start mx-5 ps-3">
+                <h3 class="h3 text-surface-950">Josemar Virtual Waiter</h3>
+                <p class="text-justify text-surface-900"><b>JVW</b> es una aplicación desarrollada para el restaurante <b>Josemar</b>, donde puedes ver los productos disponibles y realizar reservas si estás registrado.</p>
             </div>
-            
-            <p class={"text-center p-3 mx-5 " + pClass}>Bienvenido al portal web del restaurante Josemar.</p>
-            <p class={"text-center p-3 mx-5 " + pClass}>En esta aplicación puedes ver el menú del día o realizar reservas y sobre todo ver los productos disponibles.</p>
 
-            <div class={"flex flex-col items-center p-5 " + pClass}>
+            <div class="flex flex-col items-center gap-y-3 p-3 shadow bg-surface-900 card">
+
                 {#if !$userdata.id}
-                    <button class={"flex items-center gap-2 mb-5 " + bClass} onclick={() => setCurrentView('register')}>
-                        <Fa icon={faUserPlus} size="lg" /> Registrarse
-                    </button>
+                    <IconButton icon={faUserPlus} text="Registrarse" onclick={() => setCurrentView('register')} />
 
-                    <button class={"flex items-center gap-2 mb-5 " + bClass} onclick={() => setCurrentView('login')}>
-                        <Fa icon={faAddressCard} size="lg" /> Iniciar sesión
-                    </button>
+                    <IconButton icon={faAddressCard} text="Iniciar sesión" onclick={() => setCurrentView('login')} />
                 {/if}
 
-                <button class={"flex items-center gap-2 " + bClass} onclick={() => setCurrentView('user.products')}>
-                    <Fa icon={faBurger} size="lg" /> Ver los productos
-                </button>
+                <IconButton icon={faBurger} text="Ver los productos" onclick={() => setCurrentView('user.products')} />
 
                 {#if $userdata.id}
-                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserveMenu')}>
-                        <Fa icon={faCalendarDays} size="lg" /> Realizar o ver reserva
-                    </button>
+                    <IconButton icon={faCalendarDays} text="Realizar o ver reserva" onclick={() => setCurrentView('user.reserveMenu')} />
 
                     {#if $userdata.permissionLevel !== 'user'}
-                        <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.pannel')}>
-                            <Fa icon={faBriefcase} size="lg" /> Panel de empleados
-                        </button>
+                        <IconButton icon={faBriefcase} text="Panel de empleados" onclick={() => setCurrentView('worker.pannel')} />
                     {/if}
 
-                    <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={
-                    () => {
-                        axios({
-                            method: "post",
-                            url: `${window.location.origin}/api/${LogoutRequest.path}`,
-                            headers: {
-                                "Content-Type": "application/json",
-                            }
-                        }).then(() => {
-                            logout()
-                            toast.success("Sesion cerrada")
-                        }).catch(() => {
-                            toast.error("Error en la red")
-                        })}
-                    }>
-                        <Fa icon={faDoorOpen} size="lg" /> Cerrar sesión
-                    </button>
+                    <IconButton icon={faDoorOpen} text="Cerrar sesión" onclick={
+                        () => {
+                            axios({
+                                method: "post",
+                                url: `${window.location.origin}/api/${LogoutRequest.path}`,
+                                headers: {
+                                    "Content-Type": "application/json",
+                                }
+                            }).then(() => {
+                                logout()
+                                toast.success("Sesion cerrada")
+                            }).catch(() => {
+                                toast.error("Error en la red")
+                            })}
+                        }
+                    />
                 {/if}
             </div>
         </div>

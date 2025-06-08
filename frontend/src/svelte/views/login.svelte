@@ -3,21 +3,15 @@
   import ClientFooter from "../partials/ClientFooter.svelte";
   // import { UserRoundPlus } from '@lucide/svelte'
 
-  import { setCurrentView, setPreviusView } from "../lib/viewsCollector";
+  import { returnToHomeIfLogged, setCurrentView, setPreviusView } from "../lib/viewsCollector";
   import View from "../components/View.svelte";
-  import { checkSesion, userdata } from "../lib/userdata.svelte";
-  import TittleHeader from "../partials/TittleHeader.svelte";
-    import toast from "svelte-french-toast";
-    import Axios from "axios";
-    import { LoginRequest } from "_shared/requests/LoginRequest.mjs";
+  import { userdata } from "../lib/userdata.svelte";
+  import toast from "svelte-french-toast";
+  import Axios from "axios";
+  import { LoginRequest } from "_shared/requests/LoginRequest.mjs";
+  import GenericHeader from "@src/partials/GenericHeader.svelte";
 
-  const pClass = "bg-surface-100 dark:bg-surface-800 rounded-md w-fit";
-  const bClass = "bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md";
-  // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
-
-  if($userdata.id){
-    setPreviusView()
-  }
+  returnToHomeIfLogged()
 
   async function onSubmit(ev: Event) {
 
@@ -61,28 +55,33 @@
 
 <View>
   {#snippet header()}
-    <TittleHeader tittle="Josemar virtual waiter" />
+    <GenericHeader returnPage="home" currentPage="" />
   {/snippet}
 
   {#snippet main()}
-    <div class="h-full flex flex-col items-center justify-center">
-    <div class={"flex flex-col items-center p-5 " + pClass}>
+    <div class="min-h-full flex flex-col items-center justify-center">
+    <div class="flex flex-col items-center my-3 p-3 shadow bg-surface-900 card">
       <div class="h-full flex flex-col items-center gap-5">
 
-        <form onsubmit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
+        <div class="w-full">
+          <h2 class="h2">Iniciar sesión</h2>
+          <p>¿No tienes una cuenta? <button onclick={() => setCurrentView('register')} class="underline text-tertiary-300 bg-transparent border-none cursor-pointer">Registrate</button></p>
+        </div>
+
+        <form onsubmit={onSubmit} class="w-[70vw] sm:w-md space-y-3">
             <label class="label">
-                <span class="label-text text-lg">Nombre de usuario o email</span>
-                <input id="login/userOrEmail" autocomplete="username" type="text" class="input input-bordered w-full" placeholder="Introduce tu usuario o email" />
+                <span class="label-text">Nombre de usuario o email</span>
+                <input id="login/userOrEmail" autocomplete="username" type="text" class="input text-sm input-bordered w-full" placeholder="Introduce tu usuario o email" />
             </label>
 
 
             <label class="label">
-                <span class="label-text text-lg">Contraseña</span>
-                <input id="login/password" autocomplete="current-password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
+                <span class="label-text">Contraseña</span>
+                <input id="login/password" autocomplete="current-password" type="password" class="input text-sm input-bordered w-full" placeholder="Introduce tu contraseña" />
             </label>
 
             <div class="flex flex-col items-center">
-              <input id="login/submit" class={"w-fit " + bClass} type="submit" value="Entrar"/>
+              <input id="login/submit" class="w-fit btn preset-filled-primary-500 p-2 card text-sm" type="submit" value="Entrar"/>
             </div>
         </form>
       </div>

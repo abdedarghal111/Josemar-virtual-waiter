@@ -1,23 +1,15 @@
 <script lang="ts">
   
   import ClientFooter from "../partials/ClientFooter.svelte";
-  // import { UserRoundPlus } from '@lucide/svelte'
-
-  import { setCurrentView, setPreviusView } from "../lib/viewsCollector";
+  import { returnToHomeIfLogged, setCurrentView, setPreviusView } from "../lib/viewsCollector";
   import View from "../components/View.svelte";
-  import { checkSesion, userdata } from "../lib/userdata.svelte";
-  import TittleHeader from "../partials/TittleHeader.svelte";
-    import toast from "svelte-french-toast";
-    import Axios from "axios";
-    import { RegisterRequest } from "_shared/requests/RegisterRequest.mjs";
+  import { userdata } from "../lib/userdata.svelte";
+  import toast from "svelte-french-toast";
+  import Axios from "axios";
+  import { RegisterRequest } from "_shared/requests/RegisterRequest.mjs";
+  import GenericHeader from "@src/partials/GenericHeader.svelte";
 
-  const pClass = "bg-surface-100 dark:bg-surface-800 rounded-md w-fit";
-  const bClass = "bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500 p-3 rounded-md";
-  // dark:bg-surface-800 border-1 border-surface-800 dark:border-surface-50
-
-  if($userdata.id){
-    setPreviusView()
-  }
+  returnToHomeIfLogged()
 
   async function onSubmit(ev: Event) {
 
@@ -66,47 +58,52 @@
 
 <View>
   {#snippet header()}
-    <TittleHeader tittle="Josemar virtual waiter" />
+    <GenericHeader returnPage="home" currentPage="" />
   {/snippet}
 
   {#snippet main()}
-    <div class="h-full flex flex-col items-center justify-center">
-    <div class={"flex flex-col items-center p-5 " + pClass}>
+    <div class="min-h-full flex flex-col items-center justify-center">
+    <div class="my-3 flex flex-col items-center p-3 shadow bg-surface-900 card">
       <div class="h-full flex flex-col items-center gap-5">
 
-        <form onsubmit={onSubmit} class="w-[70vw] sm:w-md space-y-4">
+        <div class="w-full">
+          <h2 class="h2">Registrarse</h2>
+          <p>¿Tienes una cuenta? <button onclick={() => setCurrentView('login')} class="underline text-tertiary-300 bg-transparent border-none cursor-pointer">Iniciar sesión</button></p>
+        </div>
+
+        <form onsubmit={onSubmit} class="w-[70vw] sm:w-md space-y-3">
             <label class="label">
-                <span class="label-text text-lg">Nombre</span>
-                <input id="register/name" autocomplete="name" type="text" class="input input-bordered w-full" placeholder="Introduce tu nombre" />
+                <span class="label-text">Nombre</span>
+                <input id="register/name" autocomplete="name" type="text" class="input text-sm input-bordered w-full" placeholder="Introduce tu nombre" />
             </label>
 
             <label class="label">
-                <span class="label-text text-lg">Apellidos</span>
-                <input id="register/surname" autocomplete="family-name" type="text" class="input input-bordered w-full" placeholder="Introduce tus apellidos" />
+                <span class="label-text">Apellidos</span>
+                <input id="register/surname" autocomplete="family-name" type="text" class="input text-sm input-bordered w-full" placeholder="Introduce tus apellidos" />
             </label>
 
             <label class="label">
-                <span class="label-text text-lg">Nombre de usuario</span>
-                <input id="register/username" autocomplete="username" type="text" class="input input-bordered w-full" placeholder="Introduce tu nombre de usuario" />
+                <span class="label-text">Nombre de usuario</span>
+                <input id="register/username" autocomplete="username" type="text" class="input text-sm input-bordered w-full" placeholder="Introduce tu nombre de usuario" />
             </label>
 
             <label class="label">
-                <span class="label-text text-lg">Email</span>
-                <input id="register/email" autocomplete="email" type="email" class="input input-bordered w-full" placeholder="Introduce tu email" />
+                <span class="label-text">Email</span>
+                <input id="register/email" autocomplete="email" type="email" class="input text-sm input-bordered w-full" placeholder="Introduce tu email" />
             </label>
 
             <label class="label">
-                <span class="label-text text-lg">Contraseña</span>
-                <input id="register/password" autocomplete="current-password" type="password" class="input input-bordered w-full" placeholder="Introduce tu contraseña" />
+                <span class="label-text">Contraseña</span>
+                <input id="register/password" autocomplete="current-password" type="password" class="input text-sm input-bordered w-full" placeholder="Introduce tu contraseña" />
             </label>
 
             <label class="label">
-                <span class="label-text text-lg">Repetir Contraseña</span>
-                <input id="register/password2" autocomplete="current-password" type="password" class="input input-bordered w-full" placeholder="Repite tu contraseña" />
+                <span class="label-text">Repetir Contraseña</span>
+                <input id="register/password2" autocomplete="current-password" type="password" class="input text-sm input-bordered w-full" placeholder="Repite tu contraseña" />
             </label>
 
             <div class="flex flex-col items-center">
-              <input id="register/submit" class={"w-fit " + bClass} type="submit" value="Registrarse"/>
+              <input id="register/submit" class="w-fit btn preset-filled-primary-500 p-2 card text-sm" type="submit" value="Registrarse"/>
             </div>
         </form>
       </div>

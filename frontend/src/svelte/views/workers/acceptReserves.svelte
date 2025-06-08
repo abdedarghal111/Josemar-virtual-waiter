@@ -60,7 +60,7 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
 
            <div class="flex flex-col items-center mt-10 mx-10">
                 <h2 class={'h2 p-3 '}>Reservas</h2>

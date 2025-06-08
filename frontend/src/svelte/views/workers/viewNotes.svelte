@@ -3,7 +3,7 @@
     import View from '@src/components/View.svelte'
     import TittleHeader from '@src/partials/TittleHeader.svelte';
     import toast from 'svelte-french-toast';
-    import { CompleteOrderType } from '_shared/SharedTypes.mjs';
+    import { type CompleteOrderType } from '_shared/SharedTypes.mjs';
     import { ListObjectsMessage } from '_shared/wsComunication/ListObjectsMessage.mjs';
     import { SetOrderLineStatusMessage } from '_shared/wsComunication/SetOrderLineStatusMessage.mjs';
     import { getWebSocket, onSocketEvent, waitEvent } from '@src/lib/wsComunication';

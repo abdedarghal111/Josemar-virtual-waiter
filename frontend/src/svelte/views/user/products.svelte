@@ -1,11 +1,14 @@
 <script lang='ts'>
     import ClientFooter from '@src/partials/ClientFooter.svelte'
     import View from '@src/components/View.svelte'
-    import TittleHeader from '@src/partials/TittleHeader.svelte';
     import Axios from 'axios';
     import { GetProductsRequest } from '_shared/requests/GetProductsRequest.mjs';
     import toast from 'svelte-french-toast';
     import { type ProductAttributes } from '_shared/SharedTypes.mjs';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
+    import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+    import { setCurrentView } from '@src/lib/viewsCollector';
 
     let products = $state<ProductAttributes[]>([])
     let requested = $state<boolean>(false)
@@ -38,29 +41,26 @@
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="home" currentPage="Lista de productos" />
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Productos</h2>
+           <div class="flex flex-col items-center my-3 max-w-xl mx-3">
+                <h2 class='h2 pb-3 text-surface-950'>Productos</h2>
 
-                <div class="grid gap-4">
+                <div class="grid gap-3">
                     {#if products.length > 0 && requested}
                         {#each products as product}
-                        <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5">
+                        <div class="card shadow bg-surface-900 border-[1px] border-surface-800 card-hover">
                             <article class="p-2">
                             <span class="flex justify-between items-center">
                                 <h2 class="h6 font-bold">{product.name}</h2>
                                 <span class="text-sm font-bold me-4">{product.price.toString().replace('.', ',')} €</span>
                             </span>
-                                <p class="text-xs pe-15">{product.description}</p>
+                                <p class="text-xs">{product.description}</p>
                             </article>
-                            <footer class="flex justify-end">
-                                <button class="btn btn-primary btn-xs">Ver +</button>
-                            </footer>
                         </div>
                         {/each}
                     {:else if requested && products.length === 0}
@@ -69,6 +69,8 @@
                         <p class="placeholder animate-pulse h2">Cargando...</p>
                     {/if}
                 </div>
+                
+                <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('home')} extraClass="mt-5 mb-2 text-surface-50 bg-surface-900" />
             </div>
         </div>
     {/snippet}

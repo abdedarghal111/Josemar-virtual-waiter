@@ -36,7 +36,6 @@
   document.body.style.height = `${window.innerHeight}px`
 </script>
 
-
 {#if loadingScreen}
   <!-- svelte-ignore svelte_component_deprecated -->
   <svelte:component this={views['startScreen']}/>
@@ -48,13 +47,13 @@
 {/if}
 <Toaster/>
 
-<svelte:body on:keypress={
+<!-- <svelte:body on:keypress={
     (e) => {
       if(e.key == 'e'){
         changeTheme()
       }
     }
-}></svelte:body>
+}/> -->
 
 <svelte:window on:resize={(e) => {
   document.body.style.height = `${window.innerHeight}px`

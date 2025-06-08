@@ -3,7 +3,7 @@
     import View from '@src/components/View.svelte'
     import TittleHeader from '@src/partials/TittleHeader.svelte';
     import { faArrowLeft, faCalendarCheck, faCalendarDays, faList, faRectangleXmark } from '@fortawesome/free-solid-svg-icons';
-    import { getParameters, setCurrentView } from '@src/lib/viewsCollector';
+    import { getParameters, returnToHomeIfNotLogged, setCurrentView } from '@src/lib/viewsCollector';
     import Fa from 'svelte-fa';
     import { type ReservationAttributes } from '_shared/SharedTypes.mjs';
     import toast from 'svelte-french-toast';
@@ -12,6 +12,8 @@
     import { DeleteReservationRequest } from '_shared/requests/DeleteReservationRequest.mts';
     import { convertToDateTimeLocalString } from '_shared/helpers.mjs'
     import axios from 'axios';
+
+    returnToHomeIfNotLogged()
     
 
     let reservation = $state<ReservationAttributes>({

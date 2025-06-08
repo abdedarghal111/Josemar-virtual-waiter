@@ -1,42 +1,37 @@
 <script lang='ts'>
-    import Fa from 'svelte-fa'
-    import { faArrowLeft, faBurger, faList } from '@fortawesome/free-solid-svg-icons'
+    import { faBurger, faList } from '@fortawesome/free-solid-svg-icons'
     import ClientFooter from '@src/partials/ClientFooter.svelte'
     import View from '@src/components/View.svelte'
-    import TittleHeader from '@src/partials/TittleHeader.svelte';
-    import { setCurrentView } from '@src/lib/viewsCollector';
+    import { returnToHomeIfNotLogged, setCurrentView } from '@src/lib/viewsCollector';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
+    returnToHomeIfNotLogged()
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="home" currentPage="Reservas" />
     {/snippet}
 
     {#snippet main()}
-        <div class="h-full flex flex-col justify-center gap-10 items-center">
+        <div class="min-h-full flex flex-col justify-center items-center">
 
 
-            <div class={"flex flex-col items-center mt-10 mx-10 " + pClass}>
-                <h2 class={'h2 p-3 ' + pClass}>Panel de reservas</h2>
-                <p class={"text-center p-3 " + pClass}>Aquí puedes realizar y gestionar nuevas reservas</p>
+            <div class="flex flex-col items-center gap-10 p-3 shadow bg-surface-900 card max-w-80 m-3">
+                <div class="w-full">
+                    <h3 class='h3'>Panel de reservas</h3>
+                    <p class="text-surface-50/85">Aquí puedes realizar y gestionar reservas. Una vez realizada, nuestro equipo la revisará en menos de 24 horas.</p>
+                </div>
+
+                <div class="flex gap-3 flex-wrap justify-center">
+                    <IconButton icon={faBurger} text="Realizar nueva reserva" onclick={() => setCurrentView('user.reserve')} />
+                    <IconButton icon={faList} text="Ver mis reservas" onclick={() => setCurrentView('user.listReserves')} />
+                </div>
+
             </div>
             
-
-            <div class={"flex flex-col items-center p-5 " + pClass}>
-
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.reserve')}>
-                    <Fa icon={faBurger} size="lg" /> Realizar nueva reserva
-                </button>
-
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('user.listReserves')}>
-                    <Fa icon={faList} size="lg" /> Ver mis reservas
-                </button>
-
-            </div>
         </div>
     {/snippet}
 

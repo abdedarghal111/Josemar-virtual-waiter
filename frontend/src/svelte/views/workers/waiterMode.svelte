@@ -3,7 +3,7 @@
     import CustomModal from '@src/partials/CustomModal.svelte';
     import View from '@src/components/View.svelte';
     import TittleHeader from '@src/partials/TittleHeader.svelte';
-    import { lineType, ProductAttributes } from '_shared/SharedTypes.mjs';
+    import { type lineType, type ProductAttributes } from '_shared/SharedTypes.mjs';
     import Fa from 'svelte-fa';
     import { faArrowLeft, faBroom, faCartPlus, faListUl, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
     import { getWebSocket, onSocketEvent, waitEvent } from '@src/lib/wsComunication';

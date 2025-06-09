@@ -48,6 +48,7 @@
     import toast from "svelte-french-toast";
     import { sendMessage, waitEvent } from "@src/lib/wsComunication";
     import IconButton from '@src/components/IconButton.svelte';
+    import GenericHeader from "@src/partials/GenericHeader.svelte";
 
 
     
@@ -71,7 +72,7 @@
 
 <View>
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="admin.listUsers" currentPage={id ? "Editar usuario" : "Nuevo usuario"} />
     {/snippet}
 
     {#snippet main()}
@@ -84,28 +85,28 @@
                 <form onsubmit={handleSubmit}>
 
                     <label class="label">
-                        <span class="label-text text-lg">Nombre:</span>
-                        <input bind:value={user.name} id="user/name" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Nombre:</span>
+                        <input bind:value={user.name} id="user/name" autocomplete="off" type="text" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label">
-                        <span class="label-text text-lg">Apellido:</span>
-                        <input bind:value={user.surname} id="user/surname" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Apellido:</span>
+                        <input bind:value={user.surname} id="user/surname" autocomplete="off" type="text" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label">
-                        <span class="label-text text-lg">Nombre de usuario:</span>
-                        <input bind:value={user.username} id="user/username" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Nombre de usuario:</span>
+                        <input bind:value={user.username} id="user/username" autocomplete="off" type="text" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label">
-                        <span class="label-text text-lg">Email:</span>
-                        <input bind:value={user.email} id="user/email" autocomplete="off" type="email" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Email:</span>
+                        <input bind:value={user.email} id="user/email" autocomplete="off" type="email" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label mt-2">
-                        <span class="label-text text-lg">Nivel de permiso:</span>
-                        <select id="user/permissionLevel" bind:value={user.permissionLevel} autocomplete="off" class="input input-bordered w-full" placeholder=" - ">
+                        <span class="label-text">Nivel de permiso:</span>
+                        <select id="user/permissionLevel" bind:value={user.permissionLevel} autocomplete="off" class="input text-sm input-bordered w-full" placeholder=" - ">
                             <option value="">Seleccione un nivel de permiso</option>
                             <option value="admin">Administrador</option>
                             <option value="worker">Moderador</option>
@@ -114,12 +115,13 @@
                     </label>
 
                     <label class="label mt-2">
-                        <span class="label-text text-lg">Contraseña:</span>
-                        <input bind:value={user.password} id="user/password" autocomplete="off" type="password" class="input input-bordered w-full" placeholder={user.id != -1 ? "( rellenar para cambiar )" : "Introduce tu contraseña"} />
+                        <span class="label-text">Contraseña:</span>
+                        <input bind:value={user.password} id="user/password" autocomplete="off" type="password" class="input text-sm input-bordered w-full" placeholder={user.id != -1 ? "( rellenar para cambiar )" : "Introduce tu contraseña"} />
                     </label>
 
                     <div class="flex items-center justify-center gap-5 mt-5">
-                        <input id="user/submit" class={"w-fit " + bClass} type="submit" value="Guardar"/>
+                        <input id="user/submit" class="w-fit btn preset-filled-primary-500 p-2 card text-sm" type="submit" value="Guardar"/>
+                        
                         <button onclick={async (ev) => {
                             ev.preventDefault()
 
@@ -136,7 +138,7 @@
                             }
 
                             setCurrentView('admin.listUsers')
-                        }} class={"w-fit " + bClass}>Borrar</button>
+                        }} class="w-fit btn preset-filled-warning-500 p-2 card text-sm">Borrar</button>
                     </div>
                 </form>
             </div>

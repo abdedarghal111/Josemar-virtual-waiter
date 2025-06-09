@@ -1,7 +1,5 @@
 <script lang="ts">
     import View from '../../components/View.svelte'
-    import TittleHeader from '../../partials/TittleHeader.svelte';
-    import Fa from "svelte-fa";
     import { faArrowLeft, faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
     import { getCurrentView, setCurrentView } from "@src/lib/viewsCollector";
     
@@ -83,7 +81,6 @@
     {/snippet}
 
     {#snippet footer()}
-        <!-- flex centrado -->
         <div class="flex items-center justify-center gap-5 p-5">
             <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.editDatabase')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
             <IconButton icon={faFileCirclePlus} text="Crear nuevo" onclick={() => setCurrentView('admin.user')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>

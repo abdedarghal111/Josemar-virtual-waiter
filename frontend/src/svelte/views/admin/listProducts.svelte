@@ -7,6 +7,7 @@
     import type { ProductAttributes } from "_shared/SharedTypes.mjs";
     import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
     import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
+    import IconButton from '@src/components/IconButton.svelte';
 
     let products = $state<ProductAttributes[]>([])
 
@@ -34,45 +35,49 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center py-5">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Productos</h2>
-            </div>
+           <div class="flex flex-col justify-center items-center gap-3 p-3 shadow bg-surface-900 card mx-3">
+                <div class="w-full">
+                    <h2 class="h2">Lista de productos</h2>
+                    <p>
+                        Aquí se pueden ver todos los productos que existen en el sistema, puedes modificarlos a gusto.
+                        También puedes crear productos nuevos y elegir que permisos tienen.
+                    </p>
+                </div>
 
-            <div class="table-wrap flex-1 p-5">
-                <table class="table caption-bottom">
-                    <tbody class={"[&>tr]:hover:preset-tonal-primary min-h-full"}>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Stock</th>
-                            <th>Precio</th>
-                        </tr>
-                    {#each products as product (product.id)}
-                        <tr onclick={() => {
-                            setCurrentView('admin.product', { id: product.id })
-                        }}>
-                            <td>{product.name}</td>
-                            <td>{product.stock}</td>
-                            <td>{product.price.toString().replace('.', ',')} €</td>
-                        </tr>
-                    {/each}
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-wrap flex-1 p-5">
+                    <table class="table caption-bottom">
+                        <tbody class="min-h-full rounded-md">
+                            <tr class="bg-tertiary-100/80 text-surface-950">
+                                <th class="rounded-tl-md"><b>Nombre</b></th>
+                                <th><b>Stock</b></th>
+                                <th class="rounded-tr-md"><b>Precio</b></th>
+                            </tr>
+                        {#each products as product (product.id)}
+                            <tr onclick={() => {
+                                setCurrentView('admin.product', { id: product.id })
+                            }} class="
+                            bg-surface-800/50 odd:bg-surface-800/30 hover:bg-surface-700
+                            first:[&>td:first-child]:rounded-tl-md
+                            last:[&>td:last-child]:rounded-br-md
+                            ">
+                                <td>{product.name}</td>
+                                <td>{product.stock}</td>
+                                <td>{product.price.toString().replace('.', ',')} €</td>
+                            </tr>
+                        {/each}
+                        </tbody>
+                    </table>
+                </div>
+           </div>
         </div>
     {/snippet}
 
     {#snippet footer()}
-        <!-- flex centrado -->
         <div class="flex items-center justify-center gap-5 p-5">
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.editDatabase')}>
-                <Fa icon={faArrowLeft} size="lg" /> Volver
-            </button>
-
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.product')}>
-                <Fa icon={faFileCirclePlus} size="lg" /> Crear nuevo
-            </button>
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.editDatabase')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
+            <IconButton icon={faFileCirclePlus} text="Crear nuevo" onclick={() => setCurrentView('admin.product')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
         </div>
     {/snippet}
 </View>

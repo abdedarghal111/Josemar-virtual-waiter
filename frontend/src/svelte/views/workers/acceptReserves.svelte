@@ -10,6 +10,8 @@
     import { ListObjectsMessage } from '_shared/wsComunication/ListObjectsMessage.mjs';
     import { AcceptReserveMessage } from '_shared/wsComunication/AcceptReserveMessage.mjs';
     import toast from 'svelte-french-toast';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 
     let reservations = $state<ReservationAttributes[]>([])
 
@@ -56,20 +58,25 @@
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="worker.pannel" currentPage="Aceptar reservas" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Reservas</h2>
+           <div class="flex flex-col items-center mt-5 mb-25">
+                <div class="border-s-2 border-surface-900 text-start mx-5 ps-3 mb-5">
+                    <h3 class="h3 text-surface-950">Reservas pendientes</h3>
+                    <p class="text-justify text-surface-900">
+                        Aquí aparecerán las reservas pendientes de los clientes para que puedan ser aceptadas o rechazadas.
+                    </p>
+                </div>
 
-                <div class="grid gap-4">
+                <div class="grid gap-3">
                     {#if reservations.length > 0 && requested}
                         {#each reservations as reservation ( reservation.id )}
-                        <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover block overflow-hidden mb-5">
-                            <article class="p-2">
+                        <div class="card bg-surface-900 border-[1px] border-surface-200-800 mb-5 max-w-70">
+                            <article class="p-3">
                                 <h2 class="h6 font-bold">Reserva #{reservation.id}</h2>
                                 <p class="text-sm">Sugerida por: {reservation.requestedBy ?? 'Desconocido'}</p>
                                 <p class="text-sm">Fecha: {new Date(reservation.requestDate).toLocaleDateString()} {new Date(reservation.requestDate).toLocaleTimeString()}</p>
@@ -84,20 +91,21 @@
                         </div>
                         {/each}
                     {:else if requested}
-                        <p class="h3 text-center">Todas las reservas han sido revisadas ✅</p>
+                        
+                        <div class="card bg-surface-900 border-[1px] border-surface-200-800 max-w-90 mt-20">
+                            <p class="text-lg p-3 text-center font-bold">Todas las reservas han sido revisadas ✅</p>
+                        </div>
                     {:else}
-                        <p class="placeholder animate-pulse h2">Cargando...</p>
+                        <p class="placeholder animate-pulse h2  mt-20">Cargando...</p>
                     {/if}
                 </div>
             </div>
-
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.pannel')}>
-                <Fa icon={faArrowLeft} size="lg" /> Volver
-            </button>
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <ClientFooter />
+    {#snippet upperFooter()}
+        <div class="flex items-center justify-center gap-5 p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('worker.pannel')}/>
+        </div>
     {/snippet}
 </View>

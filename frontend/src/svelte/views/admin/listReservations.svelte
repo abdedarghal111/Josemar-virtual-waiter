@@ -7,6 +7,8 @@
     import type { ReservationAttributes } from "_shared/SharedTypes.mjs";
     import { ListObjectsMessage } from "_shared/wsComunication/ListObjectsMessage.mjs";
     import { onSocketEvent, getWebSocket, waitEvent } from "@src/lib/wsComunication";
+    import IconButton from '@src/components/IconButton.svelte';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
 
     let reservations = $state<ReservationAttributes[]>([])
 
@@ -29,64 +31,64 @@
         await waitEvent(ListObjectsMessage.event)
         waiting = ''
     })()
-
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="admin.editDatabase" currentPage="Lista de reservas" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center py-5 pb-25">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Reservas</h2>
-            </div>
+           <div class="flex flex-col justify-center items-center gap-3 p-3 shadow bg-surface-900 card mx-3">
+                <div class="w-full">
+                    <h2 class="h2">Lista de reservas</h2>
+                    <p>
+                        Aquí se pueden ver todas las reservas confirmadas y solicitadas.
+                    </p>
+                </div>
 
-            <div class="table-wrap flex-1 p-5">
-                <table class="table caption-bottom">
-                    <tbody class={"[&>tr]:hover:preset-tonal-primary min-h-full"}>
-                        <tr>
-                            <th>Id</th>
-                            <th>Usuario</th>
-                            <th>Fecha</th>
-                            <th>Adultos</th>
-                            <th>Niños</th>
-                            <th>Estado</th>
-                        </tr>
-                    {#each reservations as reservation (reservation.id)}
-                        <tr onclick={() => {
-                            // setCurrentView('admin.reservation', { id: reservation.id })
-                        }}>
-                            <td>{reservation.id}</td>
-                            <td>{reservation.requestedBy}</td>
-                            <td>{(() => {
-                                    let date = new Date(reservation.requestDate)
-                                    return `${date.getDate()}/${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}`
-                                })()}</td>
-                            <td>{reservation.numAdults}</td>
-                            <td>{reservation.numMinors}</td>
-                            <td>{reservationStatus[reservation.status] ?? "Desconocido"}</td>
-                        </tr>
-                    {/each}
-                    </tbody>
-                </table>
+                <div class="table-wrap flex-1 p-5 px-2">
+                    <table class="table caption-bottom">
+                        <tbody class="min-h-full rounded-md">
+                            <tr class="bg-tertiary-100/80 text-surface-950">
+                                <!-- <th  class="rounded-tl-md">Id</th> -->
+                                <th class="rounded-tl-md">Usuario</th>
+                                <th>Fecha</th>
+                                <th>Adultos</th>
+                                <th>Niños</th>
+                                <th  class="rounded-tr-md">Estado</th>
+                            </tr>
+                        {#each reservations as reservation (reservation.id)}
+                            <tr onclick={() => {
+                                // setCurrentView('admin.reservation', { id: reservation.id })
+                            }} class="
+                            bg-surface-800/50 odd:bg-surface-800/30 hover:bg-surface-700
+                            first:[&>td:first-child]:rounded-tl-md
+                            last:[&>td:last-child]:rounded-br-md
+                            ">
+                                <!-- <td>{reservation.id}</td> -->
+                                <td>{reservation.requestedBy}</td>
+                                <td>{(() => {
+                                        let date = new Date(reservation.requestDate)
+                                        return `${date.getDate()}/${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}`
+                                    })()}</td>
+                                <td>{reservation.numAdults}</td>
+                                <td>{reservation.numMinors}</td>
+                                <td>{reservationStatus[reservation.status] ?? "Desconocido"}</td>
+                            </tr>
+                        {/each}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <!-- flex centrado -->
-        <div class="flex items-center justify-center gap-5 p-5">
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.editDatabase')}>
-                <Fa icon={faArrowLeft} size="lg" /> Volver
-            </button>
-
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.reservation')}>
-                <Fa icon={faFileCirclePlus} size="lg" /> Crear nueva
-            </button>
+    {#snippet upperFooter()}
+        <div class="flex items-center justify-center gap-5 p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.editDatabase')}/>
         </div>
     {/snippet}
 </View>

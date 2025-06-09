@@ -10,6 +10,8 @@
     import { getCurrentView, setCurrentView } from '@src/lib/viewsCollector';
     import Fa from 'svelte-fa';
     import { faArrowLeft, faSquareCheck } from '@fortawesome/free-solid-svg-icons';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 
     let orders = $state<CompleteOrderType[]>([])
     let requested = $state<boolean>(false)
@@ -39,13 +41,13 @@
 
     const setBackgroundLineStatus = (status: string) => {
         if(status === 'notPrepared'){
-            return 'bg-surface-200 dark:bg-surface-900'
+            return 'bg-surface-400 text-surface-950 border-surface-700'
         }else if(status === 'making'){
-            return 'bg-yellow-200 dark:bg-yellow-900'
+            return 'bg-warning-400 text-warning-950 border-warning-700'
         }else if(status === 'ready'){
-            return 'bg-blue-200 dark:bg-blue-900'
+            return 'bg-tertiary-400 text-tertiary-950 border-tertiary-700'
         }else if(status === 'delivered'){
-            return 'bg-green-200 dark:bg-green-900'
+            return 'bg-success-400 text-success-950 border-success-700'
         }else{
             return ''
         }
@@ -57,34 +59,31 @@
 
     const setBackgroundOrderStatus = (order) => {
         if(isOrderDelivered(order)){
-            return 'bg-green-200 dark:bg-green-900'
+            return 'bg-success-400 text-success-950 border-success-700'
         }
-        return 'bg-surface-100 dark:bg-surface-900'
+        return 'bg-surface-900 text-surface-50 border-surface-700'
     }
-
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Pedidos" />
+        <GenericHeader returnPage="worker.waiterMode" currentPage="Pedidos" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center my-5 space-y-5 px-5">
+        <div class="min-h-full flex flex-col items-center my-5 space-y-5 px-5 pb-25">
 
-            <div class="flex flex-col gap-y-4 w-full max-w-[400px]">
+            <div class="flex flex-col gap-y-4 w-full max-w-100">
                 {#if orders.length > 0 && requested}
                     {#each orders as order (order.id)}
-                    <div class={"space-y-2 div preset-filled-surface-100-900 border-[1px] border-surface-200-800 p-3 " + setBackgroundOrderStatus(order)}>
+                    <div class={"card space-y-2 div border-[1px] border-surface-800 p-3 " + setBackgroundOrderStatus(order)}>
                         <h2 class="">{`Pedido #${order.id}`} <b>{order.name ? `(${order.name})` : ''}</b></h2>
 
                         <div class="hr border-surface-400"></div>
 
-                        <ul class="list-disc ps-5">
-                            {#each order.lines as line (line.productId)}
-                            <li class={"p-2 rounded-md mb-1 " + setBackgroundLineStatus(line.status)}>
+                        {#each order.lines as line (line.productId)}
+                            <div class={"p-2 rounded-md mb-1 " + setBackgroundLineStatus(line.status)}>
                                 <div class="flex justify-between items-center ">
                                     <span class="h6 mb-0 pb-0">{line.quantity} x {line.name}</span>
                                     <span>{statuses[line.status]}</span>
@@ -106,9 +105,8 @@
                                 {#if line.annotation && line.annotation !== ''}
                                     <span class="text-xs">{line.annotation}</span>
                                 {/if}
-                            </li>
+                            </div>
                             {/each}
-                        </ul>
 
                         
                     </div>
@@ -119,16 +117,13 @@
                     <p class="placeholder animate-pulse h2">Cargando...</p>
                 {/if}
             </div>
-
-            
-            <button onclick={() => setCurrentView('worker.waiterMode')} class={"flex items-center gap-2 mx-auto " + bClass}>
-                <Fa icon={faArrowLeft} size="lg"/> Volver
-            </button>
                 
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <ClientFooter />
+    {#snippet upperFooter()}
+        <div class="flex items-center justify-center gap-5 p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('worker.waiterMode')}/>
+        </div>
     {/snippet}
 </View>

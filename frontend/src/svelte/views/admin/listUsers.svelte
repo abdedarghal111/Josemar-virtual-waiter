@@ -29,11 +29,11 @@
 
 <View>
     {#snippet header()}
-        <GenericHeader returnPage="admin.listUsers" currentPage="Usuarios" />
+        <GenericHeader returnPage="admin.editDatabase" currentPage="Usuarios" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center py-5">
+        <div class="min-h-full flex flex-col items-center py-5 pb-25">
 
             <div class="flex flex-col justify-center items-center gap-3 p-3 shadow bg-surface-900 card mx-3">
                 <div class="w-full">
@@ -80,10 +80,10 @@
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <div class="flex items-center justify-center gap-5 p-5">
-            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.editDatabase')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
-            <IconButton icon={faFileCirclePlus} text="Crear nuevo" onclick={() => setCurrentView('admin.user')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
+    {#snippet upperFooter()}
+        <div class="flex items-center justify-center gap-5 p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.editDatabase')}/>
+            <IconButton icon={faFileCirclePlus} text="Crear nuevo" onclick={() => setCurrentView('admin.user')}/>
         </div>
     {/snippet}
 </View>

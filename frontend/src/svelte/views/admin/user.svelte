@@ -76,11 +76,11 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center">
-            <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3 mt-5">
+        <div class="min-h-full flex flex-col items-center pb-20">
+            <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3 mt-3">
                 <div class="w-full">
-                    <h3 class="h3 font-bold">Editar Reserva</h3>
-                    <p class="text-sm opacity-70">La reserva no ha sido revisada aún, puedes editarla o eliminarla.</p>
+                    <h3 class="h3 font-bold">{id ? "Editar" : "Nuevo"} usuario</h3>
+                    <p class="text-sm opacity-70">Puedes modificar todos estos campos, si introduces una nueva contraseña se cambiará para ese usuario.</p>
                 </div>
                 <form onsubmit={handleSubmit}>
 
@@ -147,9 +147,9 @@
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <div class="flex flex-col items-center p-5">
-            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.listUsers')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
+    {#snippet upperFooter()}
+        <div class="flex flex-col items-center p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.listUsers')}/>
         </div>
     {/snippet}
 </View>

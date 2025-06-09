@@ -30,20 +30,17 @@
             toast.error(response.getMessage())
         }
     };
-
-
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <script lang="ts">
     import View from '../../components/View.svelte'
     import TittleHeader from '../../partials/TittleHeader.svelte';
-    import Fa from "svelte-fa";
     import { faArrowLeft } from "@fortawesome/free-solid-svg-icons"
     import { getParameters, setCurrentView } from "@src/lib/viewsCollector";
     import toast from "svelte-french-toast";
     import { sendMessage, waitEvent } from "@src/lib/wsComunication";
+    import IconButton from "@src/components/IconButton.svelte";
+    import GenericHeader from "@src/partials/GenericHeader.svelte";
 
 
     
@@ -67,43 +64,42 @@
 
 <View>
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="admin.listProducts" currentPage={product.id ? "Editar producto" : "Nuevo producto"} />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col items-center pb-20">
 
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Producto</h2>
-            </div>
+           <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3 mt-3">
+                <div class="w-full">
+                    <h3 class="h3 font-bold">{id ? "Editar" : "Nuevo"} producto</h3>
+                    <p class="text-sm opacity-70">Puedes modificar todos estos campos.</p>
+                </div>
 
-            <div class="flex-1 p-5">
-                <!-- formulario para crear un usuario -->
-                
                 <form onsubmit={handleSubmit}>
 
                     <label class="label">
-                        <span class="label-text text-lg">Nombre:</span>
-                        <input bind:value={product.name} id="product/name" autocomplete="off" type="text" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Nombre:</span>
+                        <input bind:value={product.name} id="product/name" autocomplete="off" type="text" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label">
-                        <span class="label-text text-lg">Precio:</span>
-                        <input bind:value={product.price} id="product/price" autocomplete="off" type="number" step="0.01" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Precio:</span>
+                        <input bind:value={product.price} id="product/price" autocomplete="off" type="number" step="0.01" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label">
-                        <span class="label-text text-lg">Stock:</span>
-                        <input bind:value={product.stock} id="product/stock" autocomplete="off" type="number" class="input input-bordered w-full" placeholder=" - " />
+                        <span class="label-text">Stock:</span>
+                        <input bind:value={product.stock} id="product/stock" autocomplete="off" type="number" class="input text-sm input-bordered w-full" placeholder=" - " />
                     </label>
 
                     <label class="label">
-                        <span class="label-text text-lg">Descripción:</span>
-                        <textarea bind:value={product.description} id="product/description" autocomplete="off" class="input input-bordered w-full" placeholder=" - "></textarea>
+                        <span class="label-text">Descripción:</span>
+                        <textarea bind:value={product.description} id="product/description" autocomplete="off" rows="8" class="resize-y input text-sm input-bordered w-full" placeholder=" - "></textarea>
                     </label>
 
                     <div class="flex items-center justify-center gap-5 mt-5">
-                        <input id="user/submit" class={"w-fit " + bClass} type="submit" value="Guardar"/>
+                        <input id="user/submit" class="w-fit btn preset-filled-primary-500 p-2 card text-sm" type="submit" value="Guardar"/>
                         <button onclick={async (ev) => {
                             ev.preventDefault()
 
@@ -120,19 +116,16 @@
                             }
 
                             setCurrentView('admin.listProducts')
-                        }} class={"w-fit " + bClass}>Borrar</button>
+                        }} class="w-fit btn preset-filled-warning-500 p-2 card text-sm">Borrar</button>
                     </div>
                 </form>
             </div>
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <!-- flex centrado -->
-        <div class="flex flex-col items-center p-5">
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.listProducts')}>
-                <Fa icon={faArrowLeft} size="lg" /> Volver
-            </button>
+    {#snippet upperFooter()}
+        <div class="flex flex-col items-center p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.listProducts')}/>
         </div>
     {/snippet}
 </View>

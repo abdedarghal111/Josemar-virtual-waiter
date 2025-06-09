@@ -11,6 +11,8 @@
     import Fa from 'svelte-fa';
     import { faArrowLeft, faClock, faSquareCheck } from '@fortawesome/free-solid-svg-icons';
     import { sounds } from '@src/lib/sound';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 
     let orders = $state<CompleteOrderType[]>([])
     let requested = $state<boolean>(false)
@@ -40,13 +42,6 @@
         }
     })
 
-    let statuses = {
-        'notPrepared': 'Por preparar',
-        'making': 'Preparándose',
-        'ready': 'Listo',
-        'delivered': 'Servido',
-    }
-
     ;(async () => {
         getWebSocket().then(ws => ws.send(new ListObjectsMessage('completeOrder', orders).toString()))
         await waitEvent(ListObjectsMessage.event)
@@ -55,13 +50,13 @@
 
     const setBackgroundLineStatus = (status: string) => {
         if(status === 'notPrepared'){
-            return 'bg-surface-50 dark:bg-surface-900'
+            return 'bg-surface-50 text-surface-950'
         }else if(status === 'making'){
-            return 'bg-yellow-200 dark:bg-yellow-900'
+            return 'bg-warning-200 text-black/70'
         }else if(status === 'ready'){
-            return 'bg-blue-200 dark:bg-blue-900'
+            return 'bg-tertiary-400 text-black/70'
         }else if(status === 'delivered'){
-            return 'bg-green-200 dark:bg-green-900'
+            return 'bg-success-400 text-black/70'
         }else{
             return ''
         }
@@ -73,27 +68,27 @@
 
     const setBackgroundOrderStatus = (order) => {
         if(isOrderDelivered(order)){
-            return 'bg-green-200 dark:bg-green-900'
+            return 'bg-success-400 text-success-950'
         }
-        return 'bg-surface-100 dark:bg-surface-900'
+        return 'bg-surface-950 text-surface-50'
     }
 
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
+    const bClass = 'bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Modo cocinero" />
+        <GenericHeader returnPage="worker.pannel" currentPage="Modo cocinero" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center my-5 space-y-5 px-5">
+        <div class="min-h-full flex flex-col items-center my-5 space-y-5 px-5 pb-20">
 
             <div class="flex flex-col gap-y-4 w-full max-w-[400px]">
                 {#if orders.length > 0 && requested}
                     {#each orders as order (order.id)}
-                    <div class={"space-y-2 div preset-filled-surface-100-900 border-[1px] border-surface-200-800 p-3 " + setBackgroundOrderStatus(order)}>
+                    <div class={"card space-y-2 div preset-filled-surface-100-900 border-[1px] border-surface-200-800 p-3 " + setBackgroundOrderStatus(order)}>
                         <h2 class="">{`Pedido #${order.id}`} <b>{order.name ? `(${order.name})` : ''}</b></h2>
 
                         <div class="hr border-surface-400"></div>
@@ -107,8 +102,13 @@
                                                 {line.quantity}
                                             </div>
                                         </td>
-                                        <td class={"border border-surface-950 p-[0.1px] " + setBackgroundLineStatus(line.status)}>
-                                             {line.name}
+                                        <td class={"border border-surface-950 " + setBackgroundLineStatus(line.status)}>
+                                            <div class="flex flex-col justify-center">
+                                                <span class="p-[0.1px] px-2 text-start">{line.name}</span>
+                                                {#if line.annotation && line.annotation !== ''}
+                                                    <span class="p-[0.1px] px-2 text-start border-t border-surface-950 text-xs">({line.annotation})</span>
+                                                {/if}
+                                            </div>
                                         </td>
                                         <td class={"border border-surface-950 p-[0.1px] " + setBackgroundLineStatus(line.status)}>
                                             <button onclick={async () => {
@@ -153,16 +153,13 @@
                     <p class="placeholder animate-pulse h2">Cargando...</p>
                 {/if}
             </div>
-
-            
-            <button onclick={() => setCurrentView('worker.pannel')} class={"flex items-center gap-2 mx-auto " + bClass}>
-                <Fa icon={faArrowLeft} size="lg"/> Volver
-            </button>
                 
         </div>
     {/snippet}
 
-    {#snippet footer()}
-        <ClientFooter />
+    {#snippet upperFooter()}
+        <div class="flex items-center justify-center gap-5 p-5 bg-surface-900/50">
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('worker.pannel')}/>
+        </div>
     {/snippet}
 </View>

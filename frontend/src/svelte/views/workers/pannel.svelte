@@ -1,56 +1,40 @@
 <script lang='ts'>
-    import Fa from 'svelte-fa'
-    import { faCalendarDays, faAddressCard, faUserPlus, faBurger, faDoorOpen, faKitchenSet, faReceipt, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
+    import { faCalendarDays, faBurger, faReceipt, faFolderOpen, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
     import ClientFooter from '../../partials/ClientFooter.svelte'
     import View from '../../components/View.svelte'
-    import TittleHeader from '../../partials/TittleHeader.svelte';
     import { setCurrentView } from '../../lib/viewsCollector';
     import { userdata } from '../../lib/userdata.svelte';
+    import GenericHeader from '@src/partials/GenericHeader.svelte';
+    import IconButton from '@src/components/IconButton.svelte';
 
-    const pClass = 'bg-surface-100 dark:bg-surface-800 rounded-md w-fit'
-    const bClass = 'bg-surface-500 dark:bg-surface-900 btn preset-filled-surface-500e p-3 rounded-md'
 </script>
 
 <View>
 
     {#snippet header()}
-        <TittleHeader tittle="Josemar virtual waiter" />
+        <GenericHeader returnPage="home" currentPage="Panel de empleados" />
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col justify-center gap-10 items-center"><!-- justify-between -->
+        <div class="min-h-full flex flex-col justify-center gap-10 items-center">
 
-            <div class={"flex flex-col items-center mt-10 mx-10 " + pClass}>
-                <h2 class={'h2 p-3 ' + pClass}>Panel de trabajo</h2>
-                <p class={"text-center p-3 " + pClass}>Aquí no pueden acceder los clientes</p>
-            </div>
-            
-
-            <div class={"flex flex-col items-center p-5 " + pClass}>
-                
+            <div class="flex flex-wrap justify-center items-center gap-3 p-3 shadow bg-surface-900 card max-w-80 mx-3">
+                <div class="w-full">
+                    <h2 class="h2">Panel de trabajo</h2>
+                    <p>
+                        Esta es una zona restringida para empleados, los clientes no pueden acceder.
+                        Puedes crear, editar y eliminar todos los aspectos de la aplicación en la base de datos.
+                    </p>
+                </div>
                 {#if $userdata.permissionLevel === 'admin'}
-                    <button class={"flex items-center gap-2 " + bClass} onclick={() => setCurrentView('admin.editDatabase')}>
-                        <Fa icon={faFolderOpen} size="lg" /> Base de datos
-                    </button>
+                    <IconButton icon={faFolderOpen} text="Base de datos" onclick={() => setCurrentView('admin.editDatabase')} />
                 {/if}
 
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.cheffMode')}>
-                    <Fa icon={faBurger} size="lg" /> Modo cocinero
-                </button>
-
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.waiterMode')}>
-                    <Fa icon={faReceipt} size="lg" /> Modo camarero
-                </button>
-
-                <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('worker.acceptReserves')}>
-                    <Fa icon={faCalendarDays} size="lg" /> Aceptar reservas
-                </button>
-
+                <IconButton icon={faCalendarDays} text="Aceptar reservas" onclick={() => setCurrentView('worker.acceptReserves')} />
+                    <IconButton icon={faReceipt} text="Modo camarero" onclick={() => setCurrentView('worker.waiterMode')} />
+                <IconButton icon={faBurger} text="Modo cocinero" onclick={() => setCurrentView('worker.cheffMode')} />
+                <IconButton icon={faArrowLeft} text="Volver al inicio" onclick={() => setCurrentView('home')} />
             </div>
         </div>
-    {/snippet}
-
-    {#snippet footer()}
-        <ClientFooter />
     {/snippet}
 </View>

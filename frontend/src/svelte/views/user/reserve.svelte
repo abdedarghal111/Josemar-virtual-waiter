@@ -149,8 +149,8 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center gap-7 m-5">
-            <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3">
+        <div class="min-h-full flex flex-col items-center gap-7">
+            <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3 mt-5">
                 <div class="w-full">
                     {#if reservation.status === 'requested'}
                         {#if id}

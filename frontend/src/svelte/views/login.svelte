@@ -59,7 +59,7 @@
   {/snippet}
 
   {#snippet main()}
-    <div class="min-h-full flex flex-col items-center justify-center">
+  <div class="min-h-full flex flex-col items-center justify-center">
     <div class="flex flex-col items-center my-3 p-3 shadow bg-surface-900 card">
       <div class="h-full flex flex-col items-center gap-5">
 

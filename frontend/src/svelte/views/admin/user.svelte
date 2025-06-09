@@ -43,11 +43,11 @@
 <script lang="ts">
     import View from '../../components/View.svelte'
     import TittleHeader from '../../partials/TittleHeader.svelte';
-    import Fa from "svelte-fa";
     import { faArrowLeft } from "@fortawesome/free-solid-svg-icons"
     import { getParameters, setCurrentView } from "@src/lib/viewsCollector";
     import toast from "svelte-french-toast";
     import { sendMessage, waitEvent } from "@src/lib/wsComunication";
+    import IconButton from '@src/components/IconButton.svelte';
 
 
     
@@ -75,15 +75,12 @@
     {/snippet}
 
     {#snippet main()}
-        <div class="min-h-full flex flex-col items-center"><!-- justify-between -->
-
-           <div class="flex flex-col items-center mt-10 mx-10">
-                <h2 class={'h2 p-3 '}>Usuario</h2>
-            </div>
-
-            <div class="flex-1 p-5">
-                <!-- formulario para crear un usuario -->
-                
+        <div class="min-h-full flex flex-col items-center">
+            <div class="card bg-surface-900 border-[1px] border-surface-800 max-w-70 p-3 mt-5">
+                <div class="w-full">
+                    <h3 class="h3 font-bold">Editar Reserva</h3>
+                    <p class="text-sm opacity-70">La reserva no ha sido revisada aún, puedes editarla o eliminarla.</p>
+                </div>
                 <form onsubmit={handleSubmit}>
 
                     <label class="label">
@@ -143,15 +140,14 @@
                     </div>
                 </form>
             </div>
+
+            
         </div>
     {/snippet}
 
     {#snippet footer()}
-        <!-- flex centrado -->
         <div class="flex flex-col items-center p-5">
-            <button class={"flex items-center gap-2 mt-5 " + bClass} onclick={() => setCurrentView('admin.listUsers')}>
-                <Fa icon={faArrowLeft} size="lg" /> Volver
-            </button>
+            <IconButton icon={faArrowLeft} text="Volver" onclick={() => setCurrentView('admin.listUsers')}  extraClass="mb-2 text-surface-50 bg-surface-900"/>
         </div>
     {/snippet}
 </View>

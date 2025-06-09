@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { faBurger, faList } from '@fortawesome/free-solid-svg-icons'
+    import { faArrowLeft, faBurger, faList } from '@fortawesome/free-solid-svg-icons'
     import ClientFooter from '@src/partials/ClientFooter.svelte'
     import View from '@src/components/View.svelte'
     import { returnToHomeIfNotLogged, setCurrentView } from '@src/lib/viewsCollector';
@@ -25,9 +25,10 @@
                     <p class="text-surface-50/85">Aquí puedes realizar y gestionar reservas. Una vez realizada, nuestro equipo la revisará en menos de 24 horas.</p>
                 </div>
 
-                <div class="flex gap-3 flex-wrap justify-center">
+                <div class="flex flex-col gap-3 justify-center items-center">
                     <IconButton icon={faBurger} text="Realizar nueva reserva" onclick={() => setCurrentView('user.reserve')} />
                     <IconButton icon={faList} text="Ver mis reservas" onclick={() => setCurrentView('user.listReserves')} />
+                    <IconButton icon={faArrowLeft} text="Ir atras"  onclick={() => setCurrentView('home')}/>
                 </div>
 
             </div>

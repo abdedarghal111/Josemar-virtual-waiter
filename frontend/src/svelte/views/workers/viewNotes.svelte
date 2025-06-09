@@ -1,7 +1,5 @@
 <script lang='ts'>
-    import ClientFooter from '@src/partials/ClientFooter.svelte'
     import View from '@src/components/View.svelte'
-    import TittleHeader from '@src/partials/TittleHeader.svelte';
     import toast from 'svelte-french-toast';
     import { type CompleteOrderType } from '_shared/SharedTypes.mjs';
     import { ListObjectsMessage } from '_shared/wsComunication/ListObjectsMessage.mjs';
@@ -12,6 +10,7 @@
     import { faArrowLeft, faSquareCheck } from '@fortawesome/free-solid-svg-icons';
     import GenericHeader from '@src/partials/GenericHeader.svelte';
     import IconButton from '@src/components/IconButton.svelte';
+    import { sounds } from '@src/lib/sound';
 
     let orders = $state<CompleteOrderType[]>([])
     let requested = $state<boolean>(false)
@@ -20,6 +19,17 @@
         if(getCurrentView() !== 'worker.viewNotes'){return}
         let info = ListObjectsMessage.fromTable(data)
         if(info.getType() !== 'completeOrder'){return}
+
+        let message = info.getMessage()
+        if(message && message !== ''){
+            let parts = message.split(':separator:')
+            if(parts.length === 4 && parts[0] === 'NEW_ORDER_LINE_STATUS' && parts[3] == 'ready'){
+                toast(`Pedido #${parts[1]} - ${parts[2]} preparado`, {
+                    icon: 'ℹ️',
+                })
+                sounds.bell.play()
+            }
+        }
 
         let sortedOrders = info.getCompleteOrders().sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
 

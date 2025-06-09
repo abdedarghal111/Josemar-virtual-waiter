@@ -8,6 +8,7 @@
   import { onMount } from 'svelte';
   import { onSocketEvent } from './lib/wsComunication';
   import { PushNotificationMessage } from '_shared/wsComunication/PushNotificationMessage.mts';
+    import { sounds } from '@src/lib/sound';
 
   let loadingScreen = $state(true)
 
@@ -24,11 +25,15 @@
         'warning': '⚠️',
         'error': '❌'
       }
+
       if(notification.isOk()){
         toast(notification.getMessage(), {
           icon: icons[notification.getType()],
         })
+        
+        sounds.notification.play()
       }
+
     })
     loadingScreen = false
   })

@@ -6,9 +6,23 @@ import bellSound from "/public/bellSound.mp3";
 
 Howler.autoUnlock = true;
 
-export const sounds: { [key: string]: Howl } = {
-    ding: new Howl({src: [dingSound]}),
-    dingSuccess: new Howl({src: [dingSuccessSound]}),
-    notification: new Howl({src: [notificationSound]}),
-    bell: new Howl({src: [bellSound]})
+class HowlWrapper extends Howl {
+    play(spriteOrId?: string | number) {
+        
+        if (!Howler.ctx || Howler.ctx.state !== 'running') {
+            console.warn('AudioContext no está listo. No se reproduce el sonido.');
+            return 0
+        }
+
+        console.warn("Todo ok")
+        return super.play(spriteOrId)
+    }
+}
+
+
+export const sounds: { [key: string]: HowlWrapper } = {
+    ding: new HowlWrapper({src: [dingSound]}),
+    dingSuccess: new HowlWrapper({src: [dingSuccessSound]}),
+    notification: new HowlWrapper({src: [notificationSound]}),
+    bell: new HowlWrapper({src: [bellSound]})
 }

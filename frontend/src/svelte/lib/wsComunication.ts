@@ -5,6 +5,7 @@ import { BaseMessage } from "_shared/wsComunication/BaseMessage.mts";
 let isSecure = window.location.protocol === 'https'
 export const serverWS = `ws${isSecure ? 's' : ''}://${window.location.host}`
 
+export let connected = writable(false)
 let socket = writable<null | WebSocket>(null)
 type messageCallbackType = (data: any) => void
 let eventSubscriptions: Record<string, messageCallbackType> = {}
@@ -62,6 +63,7 @@ export function initConnection(){
     ws.addEventListener("open", () => {
         resolve(ws)
         // toast.success("Conectado correctamente")
+        connected.set(true)
         console.log("Conectado correctamente")
     });
 
@@ -77,6 +79,7 @@ export function initConnection(){
             console.error(`Error de conexión (código ${event.code}): ${event.reason || 'Conexión rechazada'}`);
         }
         socket.set(null);
+        connected.set(false)
     })
 
     ws.addEventListener("message", (received) => {

@@ -497,7 +497,7 @@ EventsController.subscribe(SetObjectMessage.event, async (sessionId: string, isA
 
             {
                 let sendAll = new ListObjectsMessage("completeOrder", cleanOrders)
-                sendAll.setSuccess("NEW_ORDER")
+                sendAll.setSuccess(`NEW_ORDER:separator:${`#${order.id}(${order.name})`}:separator:${order.lines.length}`)
                 return EventsController.fireWorkers(sessionId, sendAll)
             }
 
@@ -535,7 +535,7 @@ EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, 
                 })
 
                 let sendAll = new ListObjectsMessage("user", cleanUsers)
-                sendAll.setSuccess("NEW_USER")
+                sendAll.setSuccess("DELETED_USER")
                 return EventsController.fireAdmins(sessionId, sendAll)
             }
 
@@ -563,7 +563,7 @@ EventsController.subscribe(DeleteObjectMessage.event, async (sessionId: string, 
                 })
 
                 let sendAll = new ListObjectsMessage("product", cleanProducts)
-                sendAll.setSuccess("NEW_PRODUCT")
+                sendAll.setSuccess("DELETED_PRODUCT")
                 return EventsController.fireAdmins(sessionId, sendAll)
             }
     }
@@ -638,7 +638,8 @@ EventsController.subscribe(SetOrderLineStatusMessage.event, async (sessionId: st
         cleanOrders.push(await getCompleteOrder(order.id))
     }
 
+    let prodName = (await Product.findByPk(orderLine.productId))?.name
     let sendAll = new ListObjectsMessage("completeOrder", cleanOrders)
-    sendAll.setSuccess("LINE_STATUS_UPDATED")
+    sendAll.setSuccess("NEW_ORDER_LINE_STATUS:separator:" + orderLine.orderId + ":separator:" + prodName + ":separator:" + newStatus)
     EventsController.fireWorkers(sendAll.event, sendAll)
 })

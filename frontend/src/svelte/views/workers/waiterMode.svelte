@@ -2,9 +2,7 @@
     import { modals } from 'svelte-modals';
     import CustomModal from '@src/partials/CustomModal.svelte';
     import View from '@src/components/View.svelte';
-    import TittleHeader from '@src/partials/TittleHeader.svelte';
     import { type lineType, type ProductAttributes } from '_shared/SharedTypes.mjs';
-    import Fa from 'svelte-fa';
     import { faArrowLeft, faBroom, faCartPlus, faListUl, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
     import { getWebSocket, onSocketEvent, waitEvent } from '@src/lib/wsComunication';
     import { ListObjectsMessage } from '_shared/wsComunication/ListObjectsMessage.mjs';
@@ -15,7 +13,6 @@
     import toast from 'svelte-french-toast';
     import GenericHeader from '@src/partials/GenericHeader.svelte';
     import IconButton from '@src/components/IconButton.svelte';
-    import { Icon } from 'lucide-svelte';
 
 
     let memoProducts = storable<lineType[]>('waiterModeProducts', [])

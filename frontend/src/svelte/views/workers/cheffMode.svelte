@@ -22,6 +22,17 @@
         let info = ListObjectsMessage.fromTable(data)
         if(info.getType() !== 'completeOrder'){return}
 
+        let message = info.getMessage()
+        if(message && message !== ''){
+            let parts = message.split(':separator:')
+            if(parts.length === 3 && parts[0] === 'NEW_ORDER'){
+                toast(`Nuevo pedido ${parts[1]} con ${parts[2]} productos`, {
+                    icon: '🔔',
+                })
+                sounds.dingSuccess.play()
+            }
+        }
+
         let oneDayOrders = info.getCompleteOrders()
             .filter(order => {
                 const now = Date.now()
@@ -35,11 +46,6 @@
         let sortedOrders = oneDayOrders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
 
         orders = sortedOrders
-        
-
-        if(info.getMessage() === 'NEW_ORDER'){
-            sounds.bellSound.play()
-        }
     })
 
     ;(async () => {

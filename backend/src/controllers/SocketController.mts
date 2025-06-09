@@ -7,6 +7,11 @@ import { EventsController } from './EventsController.mts';
 const wssServer = new WebSocketServer({
   server: HttpController.server, verifyClient: async (info, verify) => {
 
+    if(!info.req.headers.cookie){
+      info.req.socket.destroy()
+      verify(false, 401)
+      return
+    }
     let sessionId = parseCookie(info.req.headers.cookie)['connect.sid'].substring(2).split('.')[0]
 
     HttpController.sessionStore.get(sessionId, async (err, session) => {

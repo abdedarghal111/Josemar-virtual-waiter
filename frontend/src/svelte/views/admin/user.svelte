@@ -109,7 +109,7 @@
                         <select id="user/permissionLevel" bind:value={user.permissionLevel} autocomplete="off" class="input text-sm input-bordered w-full" placeholder=" - ">
                             <option value="">Seleccione un nivel de permiso</option>
                             <option value="admin">Administrador</option>
-                            <option value="worker">Moderador</option>
+                            <option value="worker">Trabajador</option>
                             <option value="user">Usuario</option>
                         </select>
                     </label>

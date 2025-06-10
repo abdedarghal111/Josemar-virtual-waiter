@@ -11,8 +11,8 @@ export class RegisterRequest extends Request {
 
     constructor(success: boolean, message: string, badField?: ValidFields, user?: PrivateUser) {
         super(success, message);
-        this.user = user;
-        this.badField = badField;
+        if(user){ this.user = user }
+        if(badField){ this.badField = badField }
     }
 
     getUser(): PrivateUser {
@@ -26,8 +26,8 @@ export class RegisterRequest extends Request {
     }
 
     static getFromResponse(response: any): RegisterRequest {
-        let { success, message, user } = response.data
-        return new RegisterRequest(success, message, user);
+        let { success, message, badField, user } = response.data
+        return new RegisterRequest(success, message, badField, user);
     }
 
     toJson() {

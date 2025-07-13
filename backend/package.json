@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node esbuild.config.mjs --dev",
     "watch": "node esbuild.config.mjs --dev --watch",
-    "installModules": "shx cp package.json ../dist/package.json && cd ../dist && yarn install",
+    "installModules": "shx mkdir -p ../dist && shx cp package.json ../dist/package.json && cd ../dist && npm install",
     "runWatch": "nodemon --watch ../dist/ ../dist/app.mjs --dev",
     "dev": "npm run build && concurrently \"npm run watch\" \"npm run runWatch\""
   },

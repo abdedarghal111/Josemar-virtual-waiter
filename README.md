@@ -6,7 +6,7 @@ Proyecto de fin de grado, aplicación para ayudar al restaurante mediante la tom
 Yo he usado `yarn` pero se puede usar npm.
 ```sh
 #instalar módulos
-npm run install
+npm run installAll
 
 # añadir un .env y montarlo
 cp serverData .env.template .env

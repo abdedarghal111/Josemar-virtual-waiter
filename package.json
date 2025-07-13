@@ -5,7 +5,7 @@
     "url": "https://github.com/abdedarghal111"
   },
   "scripts": {
-    "install": "cd frontend && npm install --force && cd ../backend && npm install && npm run installModules",
+    "installAll": "npm install && cd frontend && npm install --force && cd ../backend && npm install && npm run installModules",
     "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
     "build": "cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build && cd ..",
     "start": "pm2 start dist/app.mjs --name jvw --log serverData/app.log",

@@ -5,8 +5,9 @@
     "url": "https://github.com/abdedarghal111"
   },
   "scripts": {
-    "dev": "concurrently \"cd frontend && yarn run dev\" \"cd backend && yarn run dev\"",
-    "build": "cd backend && yarn install && yarn run build && cd ../frontend && yarn install && yarn run build && cd ..",
+    "install": "cd frontend && npm install --force && cd ../backend && npm install && npm run installModules",
+    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
+    "build": "cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build && cd ..",
     "start": "pm2 start dist/app.mjs --name jvw --log serverData/app.log",
     "stop": "pm2 stop jvw"
   },

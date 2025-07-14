@@ -62,10 +62,10 @@ En esta sección se pueden observar algunas de las planificaciones realizadas en
 
 Algunas de las acciones que se pueden realizar en la aplicación y que usuarios pueden realizarlas.
 
-![Diagrama de casos de uso](.github/readmeImages/Diagrama de casos de uso.jpg)
+![Diagrama de casos de uso](/.github/readmeImages/DiagramaDeCasosDeUso.jpg)
 
 ### Diagrama de despliegue
 
 Muestra la arquitectura de la aplicación sin entrar muy al detalle pero mostrando la funcionalidad global.
 
-![Diagrama de despliegue](.github/readmeImages/Diagrama de despliegue.jpg)
+![Diagrama de despliegue](/.github/readmeImages/DiagramaDeDespliegue.jpg)

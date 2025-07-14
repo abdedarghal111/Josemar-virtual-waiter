@@ -10,6 +10,7 @@ También parece un "frankestein" porque me gusta entender a fondo lo que uso e i
 
 ## Funcionalidades destacables
 
+- Sistema de avisos/eventos (se actualiza en vivo los datos via websockets)
 - Sistema de roles y permisos
 - Sistema de registro
 - Sistema de solicitud y aceptación de reservas

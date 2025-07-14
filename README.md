@@ -8,6 +8,22 @@ Se puede observar las diferentes modificaciones y el progreso viendo el historia
 Este proyecto es solo un prototipo por lo que carece de filtrado de datos, es bastante inseguro y se han usado tecnologías incompatibles debido a que no está enfocado en la escalabilidad y la interfaz está preparada específicamente en los dispositivos móviles.
 También parece un "frankestein" porque me gusta entender a fondo lo que uso e integrarlo al máximo a mi manera.
 
+## Funcionalidades destacables
+
+- Sistema de roles y permisos
+- Sistema de registro
+- Sistema de solicitud y aceptación de reservas
+- Visualización y modificación de base de datos desde la aplicación
+- Modo cocinero: una vista adaptada para cocineros y para ver el estado de los pedidos
+- Modo camarero: una vista adaptada para los camareros para tomar notas y otra para ver los pedidos
+- Previsualización de pedidos
+
+Hay que tener en cuenta que todo esto se ha realizado para tener un prototipo funcional y verlo desde esa perspectiva, las funcionalidades están implementadas pero carecen de tests, seguridad y filtrado de datos. Está todo pensado para ser realizado lo más rápido posible y no para ser escalable.
+
+## Aviso para navegantes
+
+Probablemente si alguien fuese a probarlo sería dentro de algunos años supongo y le dará errores al instalar los paquetes de npm, la razón más normal es debido a la incompatibilidad o deprecación de los mismos, como bien es sabido, los paquetes proyectos que emplean npm suelen romperse demasiado rápido pero no porque sean frágiles, si no porque las dependencias se actualizan y generan incompatibilidades, este proyecto especialmente usa demasiadas y eso sería otra razón por la que doy ese aviso. Simplemente forzar la instalación o intentar instalar exactamente las versiones que se han usado o que están presentes en los package.json y funcionará todo como es debido.
+
 ## Conocimientos adquiridos
 
 En este proyecto se ha podido aprender más acerca de varios focos:
